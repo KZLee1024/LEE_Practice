@@ -5,7 +5,8 @@ SIGNAL_PARAMETERS = {'DEVICE_ID': 1}
 
 
 class DeviceList(QListWidget):
-    trigger_change_device = pyqtSignal(str)
+    trigger_change_device_for_player = pyqtSignal(str)
+    trigger_change_device_for_properties = pyqtSignal(dict)
 
     def __init__(self, device_list):
         super().__init__()
@@ -27,4 +28,5 @@ class DeviceList(QListWidget):
 
     def change_device(self, current):
         print(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
-        self.trigger_change_device.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
+        self.trigger_change_device_for_player.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
+        self.trigger_change_device_for_properties.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].propertiesList)
