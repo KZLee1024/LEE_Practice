@@ -20,6 +20,7 @@ class DeviceList(QListWidget):
             item.setData(SIGNAL_PARAMETERS['DEVICE_ID'], device.deviceId)
             self.addItem(item)
             if device.deviceId == 0:
+                print('first device selected, url is: ' + device.deviceUrl)
                 self.setCurrentItem(item)
 
         self.currentItemChanged.connect(self.change_device)

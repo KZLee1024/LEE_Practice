@@ -30,8 +30,8 @@ class VideoPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.player = Player(devices[0].deviceUrl)
         self.deviceList = DeviceList(devices)
-        self.player = Player()
         self.deviceList.trigger_change_device.connect(self.player.change_device)
 
         widget = QWidget(self)
