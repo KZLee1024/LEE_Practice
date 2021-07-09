@@ -1,4 +1,4 @@
-from GlobalPars import BASE_DIR
+from global_pars import BASE_DIR
 
 from PyQt5.QtCore import QDir, QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
