@@ -13,7 +13,7 @@ class DeviceList(QListWidget):
 
         self.devices = device_list
 
-        self.setSpacing(20)
+        self.setSpacing(10)
         self.setMaximumWidth(200)
         for device in device_list:
             item = QListWidgetItem(device.deviceTitle)
