@@ -1,35 +1,29 @@
+from PyQt5.QtCore import QEvent, pyqtSignal
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 
-
-class Device():
-    deviceId: int = -1
-    deviceTitle = ""
-    deviceUrl = ""
-
-    def __init__(self, id, title, url):
-        self.deviceId = id
-        self.deviceTitle = title
-        self.deviceUrl = url
-
-
-def generate_device_list() -> []:
-    return [Device(0, "CCTV-1", "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8"),
-            Device(1, "CCTV-3", "http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8"),
-            Device(2, "CCTV-5", "http://ivi.bupt.edu.cn/hls/cctv5hd.m3u8"),
-            Device(3, "CCTV-6", "http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8"),
-            Device(4, "dash", "https://dash.akamaized.net/dash264/TestCasesIOP33/adapatationSetSwitching/5/manifest.mpd")]
+SIGNAL_PARAMETERS = {'DEVICE_ID': 1}
 
 
 class DeviceList(QListWidget):
-    def __init__(self):
+    trigger_change_device = pyqtSignal(str)
+
+    def __init__(self, device_list):
         super().__init__()
-        deviceList = generate_device_list()
+
+        self.devices = device_list
 
         self.setSpacing(20)
         self.setMaximumWidth(200)
-        for device in deviceList:
+        for device in device_list:
             item = QListWidgetItem(device.deviceTitle)
+            # Add customized parameter 'deviceId' for index of '1'
+            item.setData(SIGNAL_PARAMETERS['DEVICE_ID'], device.deviceId)
             self.addItem(item)
             if device.deviceId == 0:
                 self.setCurrentItem(item)
 
+        self.currentItemChanged.connect(self.change_device)
+
+    def change_device(self, current):
+        print(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
+        self.trigger_change_device.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
