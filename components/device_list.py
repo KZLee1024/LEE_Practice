@@ -16,17 +16,17 @@ class DeviceList(QListWidget):
         self.setSpacing(10)
         self.setMaximumWidth(200)
         for device in device_list:
-            item = QListWidgetItem(device.deviceTitle)
+            item = QListWidgetItem(device.device_title)
             # Add customized parameter 'deviceId' for index of '1'
-            item.setData(SIGNAL_PARAMETERS['DEVICE_ID'], device.deviceId)
+            item.setData(SIGNAL_PARAMETERS['DEVICE_ID'], device.device_id)
             self.addItem(item)
-            if device.deviceId == 0:
-                print('first device selected, url is: ' + device.deviceUrl)
+            if device.device_id == 0:
+                print('first device selected, url is: ' + device.device_url)
                 self.setCurrentItem(item)
 
         self.currentItemChanged.connect(self.change_device)
 
     def change_device(self, current):
-        print(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
-        self.trigger_change_device_for_player.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].deviceUrl)
-        self.trigger_change_device_for_properties.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].propertiesList)
+        print(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].device_url)
+        self.trigger_change_device_for_player.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].device_url)
+        self.trigger_change_device_for_properties.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].properties_list)

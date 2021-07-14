@@ -3,21 +3,21 @@ import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget
 
-from Components.device_list import DeviceList
-from Components.player import Player
-from Components.properties_list import PropertiesList
+from components.device_list import DeviceList
+from components.player import Player
+from components.properties_list import PropertiesList
 
 
 class Device:
-    deviceId: int = -1
-    deviceTitle = ""
-    deviceUrl = ""
+    device_id: int = -1
+    device_title = ""
+    device_url = ""
 
     def __init__(self, id, title, url, properties):
-        self.deviceId = id
-        self.deviceTitle = title
-        self.deviceUrl = url
-        self.propertiesList = properties
+        self.device_id = id
+        self.device_title = title
+        self.device_url = url
+        self.properties_list = properties
 
 
 devices = [Device(0, "CCTV-1", "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8",
@@ -35,17 +35,17 @@ class VideoPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.deviceList = DeviceList(devices)
-        self.player = Player(devices[0].deviceUrl)
-        self.properties_list = PropertiesList(devices[0].propertiesList)
-        self.deviceList.trigger_change_device_for_player.connect(self.player.change_device)
-        self.deviceList.trigger_change_device_for_properties.connect(self.properties_list.update_list)
+        self.device_list = DeviceList(devices)
+        self.player = Player(devices[0].device_url)
+        self.properties_list = PropertiesList(devices[0].properties_list)
+        self.device_list.trigger_change_device_for_player.connect(self.player.change_device)
+        self.device_list.trigger_change_device_for_properties.connect(self.properties_list.update_list)
 
         widget = QWidget(self)
         self.setCentralWidget(widget)
 
         layout = QHBoxLayout()
-        layout.addWidget(self.deviceList)
+        layout.addWidget(self.device_list)
         layout.addWidget(self.player)
         layout.addWidget(self.properties_list)
         widget.setLayout(layout)
@@ -56,9 +56,9 @@ class VideoPlayer(QMainWindow):
         openFileAction.setStatusTip('Open movie')
         openFileAction.triggered.connect(self.player.open_file)
 
-        menuBar = self.menuBar()
-        fileMenu = menuBar.addMenu(' &File')
-        fileMenu.addAction(openFileAction)
+        menu_bar = self.menuBar()
+        file_menu = menu_bar.addMenu(' &File')
+        file_menu.addAction(openFileAction)
 
         self.setWindowTitle("qiyuan-terminal")
 
@@ -71,8 +71,8 @@ class VideoPlayer(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    videoPlayer = VideoPlayer()
-    videoPlayer.resize(1280, 720)
-    videoPlayer.center()
-    videoPlayer.show()
+    video_player = VideoPlayer()
+    video_player.resize(1280, 720)
+    video_player.center()
+    video_player.show()
     sys.exit(app.exec_())
