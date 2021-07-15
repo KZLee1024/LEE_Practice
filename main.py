@@ -17,10 +17,12 @@ class Terminal(QMainWindow):
         devices = Device.sample()
         #
         self.device_list = DeviceList(devices)
-        # self.player = Player(devices[0].device_url)
+        self.device_map = DeviceMap(devices)
+        # self.player = Player(devices[0].stream_url)
         # self.properties_list = PropertiesList(devices[0].properties_list)
         # self.device_list.trigger_change_device_for_player.connect(self.player.change_device)
         # self.device_list.trigger_change_device_for_properties.connect(self.properties_list.update_list)
+        self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
         #
         # widget = QWidget(self)
         # self.setCentralWidget(widget)
@@ -44,7 +46,7 @@ class Terminal(QMainWindow):
         self.setWindowTitle("qiyuan-terminal")
 
         # Try
-        self.device_map = DeviceMap(devices)
+
 
         widget = QWidget(self)
         self.setCentralWidget(widget)
