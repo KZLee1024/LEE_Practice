@@ -49,9 +49,9 @@ class Device:
     def sample() -> []:
         return [Device(DeviceType.UGV, 0, "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8",
                        {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
-                Device(DeviceType.UGV, 1, "http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8",
+                Device(DeviceType.USV, 1, "http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8",
                        {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
-                Device(DeviceType.UGV, 2, "http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8",
+                Device(DeviceType.UAV, 2, "http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8",
                        {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
                 Device(DeviceType.UGV, 3,
                        "https://dash.akamaized.net/dash264/TestCasesIOP33/adapatationSetSwitching/5/manifest.mpd",
