@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QEvent, pyqtSignal, QModelIndex
+from PyQt5.QtCore import QEvent, pyqtSignal, QModelIndex, Qt
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QPushButton, QMainWindow, QWidget, QHBoxLayout
 
 from components.player import Player
@@ -51,5 +51,6 @@ class DeviceList(QListWidget):
         layout.addWidget(properties)
         widget.setLayout(layout)
 
+        window_player.setAttribute(Qt.WA_DeleteOnClose)
         window_player.resize(800, 500)
         window_player.show()
