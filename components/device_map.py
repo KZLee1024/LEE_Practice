@@ -22,11 +22,11 @@ class DeviceMap(QWidget):
         container.setStyleSheet('QWidget{background-color: #ffffff}')
         # background.setStyleSheet("background-color: yellow;")
 
-        button = QPushButton("Button")
-        button.clicked.connect(self.move_to)
+        button_move = QPushButton("Move To")
+        button_move.clicked.connect(self.move_to)
         h_box = QHBoxLayout()
         h_box.addStretch(1)
-        h_box.addWidget(button)
+        h_box.addWidget(button_move)
 
         layout = QVBoxLayout()
         layout.addWidget(container)
@@ -55,15 +55,16 @@ class DeviceMap(QWidget):
     # enter the target coordinate and move
     def move_to(self):
         target_coordinate_x, ok_x = QInputDialog.getDouble(self, 'Input Dialog', 'Enter x(0.0-1.0): ')
-        target_coordinate_y, ok_y = QInputDialog.getDouble(self, 'Input Dialog', 'Enter y(0.0-1.0): ')
-        if ok_x and ok_y:
-            print('moving...')
-            self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
-            self.anim.setDuration(1000)
-            self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
-            self.anim.setEndValue(
-                self.coordinate_transform(target_coordinate_x, target_coordinate_y))
-            self.anim.start()
+        if ok_x:
+            target_coordinate_y, ok_y = QInputDialog.getDouble(self, 'Input Dialog', 'Enter y(0.0-1.0): ')
+            if ok_y:
+                print('moving...')
+                self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
+                self.anim.setDuration(1000)
+                self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
+                self.anim.setEndValue(
+                    self.coordinate_transform(target_coordinate_x, target_coordinate_y))
+                self.anim.start()
 
     # click and move
     def mousePressEvent(self, e: QMouseEvent) -> None:
