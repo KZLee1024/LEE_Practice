@@ -17,10 +17,10 @@ class Player(QWidget):
 
         video_widget = QVideoWidget()
 
-        self.button_open = QPushButton(QIcon(BASE_DIR + "/assets/icons/live_tv.svg"), "Open", self)
-        self.button_open.setStatusTip("Open Live Stream")
-        self.button_open.resize(self.button_open.sizeHint())
-        self.button_open.clicked.connect(self.open_stream)
+        # self.button_open = QPushButton(QIcon(BASE_DIR + "/assets/icons/live_tv.svg"), "Open", self)
+        # self.button_open.setStatusTip("Open Live Stream")
+        # self.button_open.resize(self.button_open.sizeHint())
+        # self.button_open.clicked.connect(self.open_stream)
 
         self.button_play = QPushButton(QIcon(BASE_DIR + "/assets/icons/play.svg"), "Play", self)
         self.button_play.setStatusTip("Play / Pause")
@@ -29,7 +29,7 @@ class Player(QWidget):
 
         h_box = QHBoxLayout()
         h_box.addStretch(1)
-        h_box.addWidget(self.button_open)
+        # h_box.addWidget(self.button_open)
         h_box.addWidget(self.button_play)
 
         layout = QVBoxLayout()
