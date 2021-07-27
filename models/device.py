@@ -47,7 +47,7 @@ class Device:
 
     @staticmethod
     def sample() -> []:
-        return [Device(DeviceType.UGV, 0, "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8",
+        return [Device(DeviceType.UGV, 0, "rtmp://172.30.20.121:1935/live/test",
                        {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
                 Device(DeviceType.USV, 1, "http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8",
                        {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
