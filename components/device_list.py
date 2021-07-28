@@ -15,6 +15,7 @@ class DeviceList(QListWidget):
     trigger_change_device_for_player = pyqtSignal(str)
     trigger_change_device_for_properties = pyqtSignal(dict)
     trigger_change_device_for_map = pyqtSignal(int)
+    trigger_change_device_for_previews = pyqtSignal(int)
 
     def __init__(self, device_list):
         super().__init__()
@@ -49,6 +50,7 @@ class DeviceList(QListWidget):
         # self.trigger_change_device_for_properties.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].properties)
         self.trigger_change_device_for_map.emit(self.currentRow())
 
+    # TODO: May deliver the player_list[index](preview_list) directly to new window
     def play(self, item):
         player = Player(self.devices[self.currentRow()].stream_url)
         properties = PropertiesList(self.devices[self.currentRow()].properties)

@@ -25,6 +25,7 @@ class Terminal(QMainWindow):
         # self.device_list.trigger_change_device_for_player.connect(self.player.change_device)
         # self.device_list.trigger_change_device_for_properties.connect(self.properties_list.update_list)
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
+        self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
         #
         # widget = QWidget(self)
         # self.setCentralWidget(widget)
