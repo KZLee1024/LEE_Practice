@@ -14,7 +14,12 @@ import threading
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # ============== 绑定一个本地地址 ============== #
-localaddr = ("10.24.83.164", 8888)
+# host = socket.gethostname()
+# port = 8888
+# local_addr = (host, port)
+# udp_socket.bind(local_addr)
+#
+localaddr = ("172.30.21.219", 8888)
 udp_socket.bind(localaddr)
 
 def recv_message():
@@ -23,19 +28,37 @@ def recv_message():
     recv_data, _ = udp_socket.recvfrom(1024)
     recv_data = recv_data.decode('utf-8')
 
-    if recv_data[0] == "x":
-        # =======过滤出字母和数字========= #
-        recv_data = filter(str.isalnum, str(recv_data))
-        recv_data = ''.join(list(recv_data))
-        # ======= 获得坐标值 ========= #
-        x = int(recv_data.split('x')[1].split('y')[0])
-        y = int(recv_data.split('x')[1].split('y')[1])
+    print(recv_data)
+    udp_socket.close()
 
-    print((x, y))
+    # if recv_data[0] == "x":
+    #     # =======过滤出字母和数字========= #
+    #     recv_data = filter(str.isalnum, str(recv_data))
+    #     recv_data = ''.join(list(recv_data))
+    #     # ======= 获得坐标值 ========= #
+    #     x = int(recv_data.split('x')[1].split('y')[0])
+    #     y = int(recv_data.split('x')[1].split('y')[1])
+    #
+    # print((x, y))
     # udp_socket.close()
+
+def main():
+    while True:
+        recv_data, _ = udp_socket.recvfrom(1024)
+        recv_data = recv_data.decode('utf-8')
+
+        print(recv_data)
+        if recv_data == "EOF":
+            break
+
+    udp_socket.close()
+
+
 
 if __name__ == '__main__':
     # t = threading.Thread(target=recv_message, args=())
     # t.start()  # 开始线程
-    while True:
-        recv_message()
+    # while True:
+    #     recv_message()
+
+    main()
