@@ -8,7 +8,9 @@ from components.device_map import DeviceMap
 from components.player import Player
 from components.preview_list import PreviewList
 from components.properties_list import PropertiesList
+
 from models.device import Device
+from utlis.udp_client import UDPClient
 
 
 class Terminal(QMainWindow):
@@ -16,7 +18,9 @@ class Terminal(QMainWindow):
         super().__init__()
 
         devices = Device.sample()
-        #
+
+        self.client = UDPClient()
+
         self.device_list = DeviceList(devices)
         self.device_map = DeviceMap(devices)
         self.preview_list = PreviewList(devices)
@@ -26,7 +30,8 @@ class Terminal(QMainWindow):
         # self.device_list.trigger_change_device_for_properties.connect(self.properties_list.update_list)
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
         self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
-        #
+        self.client.trigger_move_device.connect(self.device_map.move_device_handler)
+
         # widget = QWidget(self)
         # self.setCentralWidget(widget)
         #
