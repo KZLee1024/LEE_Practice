@@ -3,8 +3,16 @@ import threading
 import random
 import time
 
-from utlis.arg_parser import getArg
+# from utlis.arg_parser import getArg
+from sys import argv
 
+def getArg(flag, default = None):
+    for i, v in enumerate(argv):
+        if v == flag:
+            if len(argv) < i + 2:
+                break
+            return argv[i+1]
+    return default
 
 device_limit = int(getArg("-ld", 4))
 message_limit = int(getArg("-lm", 10))
@@ -22,7 +30,7 @@ def send_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
-        time.sleep(random.random()*20)
+        time.sleep(random.random()*10)
 
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
