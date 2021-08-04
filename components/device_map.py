@@ -103,3 +103,10 @@ class DeviceMap(QWidget):
         point = self.label_list[self.selected_device_index].pos()
         self.label_list[self.selected_device_index].setGeometry(QRect(point, QSize(70, 70)))
         self.label_list[self.selected_device_index].setPalette(pe)
+
+    def move_device_handler(self, device_index, x, y):
+        self.anim = QPropertyAnimation(self.label_list[device_index], b"pos")
+        self.anim.setDuration(2000)
+        self.anim.setStartValue(self.label_list[device_index].pos())
+        self.anim.setEndValue(self.coordinate_transform(x/100, y/100))
+        self.anim.start()
