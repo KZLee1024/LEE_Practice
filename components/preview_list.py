@@ -21,16 +21,19 @@ class PreviewList(QScrollArea):
 
         layout = QGridLayout()
         layout.setSpacing(0)
-        start_row, start_col = 0, 0
+        row, col = 0, 0
 
         for index in range(len(self.devices)):
             new_preview = self.Preview(self.devices[index])
-            layout.addWidget(new_preview, start_row, start_col)
+            layout.addWidget(new_preview, row, col)
             self.previews.append(new_preview)
+
             if index % 2 == 0:
-                start_col = (start_col + 1) % 2
+                col = 1
             else:
-                start_row += 1
+                col = 0
+                row += 1
+
 
         if len(self.previews) > 0:
             self.change_device_handler(0)
