@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QEvent, pyqtSignal, QModelIndex, Qt, QUrl, QSize
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QPushButton, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, \
-    QLabel, QScrollArea
+    QLabel, QScrollArea, QGridLayout
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 
@@ -15,16 +15,22 @@ class PreviewList(QScrollArea):
         super().__init__()
         self.devices = devices
 
-        self.setMinimumWidth(550)
-        self.setMaximumWidth(550)
+        self.setMinimumWidth(795)
+        self.setMaximumWidth(795)
         self.scroll_container = QWidget()
 
-        layout = QVBoxLayout()
-        layout.setSpacing(10)
-        for device in self.devices:
-            new_preview = self.Preview(device)
-            layout.addWidget(new_preview)
+        layout = QGridLayout()
+        layout.setSpacing(0)
+        start_row, start_col = 0, 0
+
+        for index in range(len(self.devices)):
+            new_preview = self.Preview(self.devices[index])
+            layout.addWidget(new_preview, start_row, start_col)
             self.previews.append(new_preview)
+            if index % 2 == 0:
+                start_col = (start_col + 1) % 2
+            else:
+                start_row += 1
 
         if len(self.previews) > 0:
             self.change_device_handler(0)
@@ -55,7 +61,7 @@ class PreviewList(QScrollArea):
             self.layout = QVBoxLayout()
 
             self.tiny_player_container = QVideoWidget()
-            self.tiny_player_container.setMinimumWidth(480)
+            self.tiny_player_container.setMinimumWidth(360)
             self.tiny_player_container.setMinimumHeight(320)
             self.tiny_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
             self.tiny_player.setMedia(QMediaContent(QUrl(device.stream_url)))
