@@ -48,7 +48,7 @@ class DeviceMap(QWidget):
             label.setScaledContents(True)
             # label.setAutoFillBackground(True)
             label.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignTop)
-            # label.move(self.coordinate_transform(device.coordinate[0], device.coordinate[1]))
+            # label.move(self.coordinate_transform(source.coordinate[0], source.coordinate[1]))
             self.label_list.append(label)
 
         if len(self.device_list) > 0:

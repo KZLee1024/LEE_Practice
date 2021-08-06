@@ -34,7 +34,6 @@ class PreviewList(QScrollArea):
                 col = 0
                 row += 1
 
-
         if len(self.previews) > 0:
             self.change_device_handler(0)
 
