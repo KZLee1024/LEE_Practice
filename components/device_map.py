@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QRect, QSize, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QFrame, QInputDialog
-from PyQt5.QtGui import QPixmap, QColor, QIcon, QImage, QMouseEvent, QPalette
+from PyQt5.QtGui import QPixmap, QColor, QIcon, QImage, QMouseEvent, QPalette, QBrush
 from PyQt5.QtCore import Qt
 
 import global_pars
@@ -17,10 +17,14 @@ class DeviceMap(QWidget):
         super().__init__()
 
         container = QWidget(self)
+        container.setAutoFillBackground(True)
         container.setFixedSize(global_pars.MAP_WIDTH, global_pars.MAP_HEIGHT)
 
-        container.setStyleSheet('QWidget{background-color: #ffffff}')
+        # container.setStyleSheet('QWidget{background-image: ' + global_pars.BASE_DIR + '/assets/imgs/map-background.jpg}')
         # background.setStyleSheet("background-color: yellow;")
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, QBrush(QPixmap(global_pars.BASE_DIR + "/assets/imgs/map-background.jpg")))
+        container.setPalette(palette)
 
         button_move = QPushButton("Move To")
         button_move.clicked.connect(self.move_to)
@@ -42,7 +46,7 @@ class DeviceMap(QWidget):
             label.setPixmap(pixmap)
             label.setGeometry(QRect(self.coordinate_transform(device.coordinate[0], device.coordinate[1]), QSize(30, 30)))
             label.setScaledContents(True)
-            label.setAutoFillBackground(True)
+            # label.setAutoFillBackground(True)
             label.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignTop)
             # label.move(self.coordinate_transform(device.coordinate[0], device.coordinate[1]))
             self.label_list.append(label)
