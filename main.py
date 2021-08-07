@@ -73,25 +73,25 @@ class Terminal(QMainWindow):
     def play_specific_local_video_handler(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Movie", QDir.homePath())
         if file_name != ' ':
-            self.player = Player()
-            self.player.open_file(file_name)
-            self.show_player()
+            player = Player()
+            player.open_file(file_name)
+            self.show_player(player)
 
     # TODO: May deliver the player_list[index](preview_list) directly to new window
     def play_specific_stream_handler(self, device):
         if device.device_type != DeviceType.undefined:
-            self.player = Player()
-            self.player.open_stream(device.stream_url)
-            self.show_player()
+            player = Player()
+            player.open_stream(device.stream_url)
+            self.show_player(player)
 
-    def show_player(self, ):
+    def show_player(self, player):
         window_player = QMainWindow(self)
 
         widget = QWidget(self)
         window_player.setCentralWidget(widget)
 
         layout = QHBoxLayout()
-        layout.addWidget(self.player)
+        layout.addWidget(player)
         # layout.addWidget(properties)
         widget.setLayout(layout)
 
