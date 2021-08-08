@@ -92,10 +92,12 @@ class DeviceMap(QWidget):
         print('widget position: ', self.pos())
         print('press position: ', e.pos())
 
+        target = e.pos()
+        canvas = self.geometry()
         self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
         self.anim.setDuration(1000)
         self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
-        self.anim.setEndValue(e.pos())
+        self.anim.setEndValue(self.coordinate_transform(target.x()/canvas.width(), target.y()/canvas.height()))
         self.anim.start()
 
     #  (0,0) ——————————————————— (wid,0)    #
@@ -106,6 +108,11 @@ class DeviceMap(QWidget):
     def coordinate_transform(self, target_coordinate_x: float, target_coordinate_y: float) -> QPoint:
         # Waiting for Coordinate Signal
         # return clickPos directly now
+        if target_coordinate_x > 0.85:
+            target_coordinate_x = 0.85
+        if target_coordinate_y > 0.8:
+            target_coordinate_y = 0.8
+
         return QPoint(int(self.geometry().width() * target_coordinate_x), int(self.geometry().height() * target_coordinate_y))
 
     def change_device_handler(self, new_index):
