@@ -18,3 +18,5 @@ class PropertiesList(QListWidget):
             self.addItem(item)
 
 
+
+

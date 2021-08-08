@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QRect, QSize, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QFrame, QInputDialog
-from PyQt5.QtGui import QPixmap, QColor, QIcon, QImage, QMouseEvent, QPalette
+from PyQt5.QtGui import QPixmap, QColor, QIcon, QImage, QMouseEvent, QPalette, QBrush
 from PyQt5.QtCore import Qt
 
 import global_pars
@@ -10,17 +10,21 @@ from models.device import Device, DeviceType
 
 class DeviceMap(QWidget):
     device_list: [Device] = []
-    label_list: [QLabel] = []
+    label_list: [QWidget] = []
     selected_device_index = -1
 
     def __init__(self, device_list: [Device]):
         super().__init__()
 
         container = QWidget(self)
+        container.setAutoFillBackground(True)
         container.setFixedSize(global_pars.MAP_WIDTH, global_pars.MAP_HEIGHT)
 
-        container.setStyleSheet('QWidget{background-color: #ffffff}')
+        # container.setStyleSheet('QWidget{background-image: ' + global_pars.BASE_DIR + '/assets/imgs/map-background.jpg}')
         # background.setStyleSheet("background-color: yellow;")
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, QBrush(QPixmap(global_pars.BASE_DIR + "/assets/imgs/map-background.jpg")))
+        container.setPalette(palette)
 
         button_move = QPushButton("Move To")
         button_move.clicked.connect(self.move_to)
@@ -38,14 +42,29 @@ class DeviceMap(QWidget):
         for device in self.device_list:
             pixmap = QPixmap(global_pars.BASE_DIR + device.device_type.icon_filename())
 
-            label = QLabel(container)
-            label.setPixmap(pixmap)
-            label.setGeometry(QRect(self.coordinate_transform(device.coordinate[0], device.coordinate[1]), QSize(30, 30)))
-            label.setScaledContents(True)
-            label.setAutoFillBackground(True)
-            label.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignTop)
-            # label.move(self.coordinate_transform(device.coordinate[0], device.coordinate[1]))
-            self.label_list.append(label)
+            widget = QWidget(container)
+            layout = QVBoxLayout()
+            layout.setSpacing(0)
+
+            label_pix = QLabel()
+            label_pix.setPixmap(pixmap)
+            label_pix.setScaledContents(True)
+            label_pix.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignTop)
+
+            label_text = QLabel()
+            label_text.setText(device.title())
+            label_text.setScaledContents(True)
+            label_text.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+            label_text.setMaximumHeight(20)
+
+            layout.addWidget(label_pix)
+            layout.addWidget(label_text)
+            widget.setLayout(layout)
+            widget.resize(70, 90)
+
+            widget.move(self.coordinate_transform(device.coordinate[0], device.coordinate[1]))
+            self.label_list.append(widget)
+
 
         if len(self.device_list) > 0:
             self.change_device_handler(0)
@@ -73,10 +92,12 @@ class DeviceMap(QWidget):
         print('widget position: ', self.pos())
         print('press position: ', e.pos())
 
+        target = e.pos()
+        canvas = self.geometry()
         self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
         self.anim.setDuration(1000)
         self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
-        self.anim.setEndValue(e.pos())
+        self.anim.setEndValue(self.coordinate_transform(target.x()/canvas.width(), target.y()/canvas.height()))
         self.anim.start()
 
     #  (0,0) ——————————————————— (wid,0)    #
@@ -87,21 +108,34 @@ class DeviceMap(QWidget):
     def coordinate_transform(self, target_coordinate_x: float, target_coordinate_y: float) -> QPoint:
         # Waiting for Coordinate Signal
         # return clickPos directly now
+        if target_coordinate_x > 0.85:
+            target_coordinate_x = 0.85
+        if target_coordinate_y > 0.8:
+            target_coordinate_y = 0.8
+
         return QPoint(int(self.geometry().width() * target_coordinate_x), int(self.geometry().height() * target_coordinate_y))
 
     def change_device_handler(self, new_index):
         if self.selected_device_index != -1:
+            self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
+            self.anim.setDuration(100)
+            self.anim.setStartValue(self.label_list[self.selected_device_index].size())
+            self.anim.setEndValue(QSize(70, 90))
+            self.anim.start()
+            # point = self.label_list[self.selected_device_index].pos()
+            self.label_list[self.selected_device_index].resize(QSize(70, 90))
             pe = QPalette()
-            pe.setColor(QPalette.WindowText, Qt.green)
-            point = self.label_list[self.selected_device_index].pos()
-            self.label_list[self.selected_device_index].setGeometry(QRect(point, QSize(30, 30)))
+            pe.setColor(QPalette.WindowText, Qt.black)
             self.label_list[self.selected_device_index].setPalette(pe)
         print('new index: ', new_index)
         self.selected_device_index = new_index
         pe = QPalette()
         pe.setColor(QPalette.WindowText, Qt.green)
-        point = self.label_list[self.selected_device_index].pos()
-        self.label_list[self.selected_device_index].setGeometry(QRect(point, QSize(70, 70)))
+        self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
+        self.anim.setDuration(100)
+        self.anim.setStartValue(self.label_list[self.selected_device_index].size())
+        self.anim.setEndValue(QSize(90, 110))
+        self.anim.start()
         self.label_list[self.selected_device_index].setPalette(pe)
 
     def move_device_handler(self, device_index, x, y):

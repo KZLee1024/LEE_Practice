@@ -1,7 +1,8 @@
 import sys
 
+from PyQt5.QtCore import Qt, QDir
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, QFileDialog
 
 from components.device_list import DeviceList
 from components.device_map import DeviceMap
@@ -9,11 +10,13 @@ from components.player import Player
 from components.preview_list import PreviewList
 from components.properties_list import PropertiesList
 
-from models.device import Device
+from models.device import Device, DeviceType
 from utlis.udp_client import UDPClient
 
 
 class Terminal(QMainWindow):
+    player = None
+
     def __init__(self):
         super().__init__()
 
@@ -24,36 +27,14 @@ class Terminal(QMainWindow):
         self.device_list = DeviceList(devices)
         self.device_map = DeviceMap(devices)
         self.preview_list = PreviewList(devices)
-        # self.player = Player(devices[0].stream_url)
-        # self.properties_list = PropertiesList(devices[0].properties_list)
-        # self.device_list.trigger_change_device_for_player.connect(self.player.change_device)
-        # self.device_list.trigger_change_device_for_properties.connect(self.properties_list.update_list)
-        self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
-        self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
-        self.client.trigger_move_device.connect(self.device_map.move_device_handler)
 
-        # widget = QWidget(self)
-        # self.setCentralWidget(widget)
-        #
-        # r_layout = QHBoxLayout()
-        # r_layout.addWidget(self.device_list)
-        # r_layout.addWidget(self.player)
-        # r_layout.addWidget(self.properties_list)
-        # widget.setLayout(r_layout)
-        #
-        # self.statusBar()
-        # openFileAction = QAction(QIcon("./assets/icons/folder.svg"), "&Open", self)
-        # openFileAction.setShortcut('Ctrl+O')
-        # openFileAction.setStatusTip('Open movie')
-        # openFileAction.triggered.connect(self.player.open_file)
-        #
-        # menu_bar = self.menuBar()
-        # file_menu = menu_bar.addMenu(' &File')
-        # file_menu.addAction(openFileAction)
+        self.statusBar()
+        self.menu_bar = self.menuBar()
+
+        self.connect_component_signals()
+        self.init_menu_actions()
 
         self.setWindowTitle("qiyuan-terminal")
-
-        # Try
 
         widget = QWidget(self)
         self.setCentralWidget(widget)
@@ -68,11 +49,55 @@ class Terminal(QMainWindow):
 
         widget.setLayout(layout)
 
+    def connect_component_signals(self):
+        self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
+        self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
+        self.device_list.trigger_play.connect(self.play_specific_stream_handler)
+        self.client.trigger_move_device.connect(self.device_map.move_device_handler)
+
+    def init_menu_actions(self):
+        openFileAction = QAction(QIcon("./assets/icons/folder.svg"), "&Open", self)
+        openFileAction.setShortcut('Ctrl+O')
+        openFileAction.setStatusTip('Open movie')
+        openFileAction.triggered.connect(self.play_specific_local_video_handler)
+
+        file_menu = self.menu_bar.addMenu(' &File')
+        file_menu.addAction(openFileAction)
+
     def center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
+    def play_specific_local_video_handler(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Movie", QDir.homePath())
+        if file_name != ' ':
+            player = Player()
+            player.open_file(file_name)
+            self.show_player(player)
+
+    # TODO: May deliver the player_list[index](preview_list) directly to new window
+    def play_specific_stream_handler(self, device):
+        if device.device_type != DeviceType.undefined:
+            player = Player()
+            player.open_stream(device.stream_url)
+            self.show_player(player)
+
+    def show_player(self, player):
+        window_player = QMainWindow(self)
+
+        widget = QWidget(self)
+        window_player.setCentralWidget(widget)
+
+        layout = QHBoxLayout()
+        layout.addWidget(player)
+        # layout.addWidget(properties)
+        widget.setLayout(layout)
+
+        window_player.setAttribute(Qt.WA_DeleteOnClose)
+        window_player.resize(1080, 720)
+        window_player.show()
 
 
 if __name__ == '__main__':
