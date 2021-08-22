@@ -1,8 +1,9 @@
 import sys
 
 from PyQt5.QtCore import Qt, QDir
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, QFileDialog
+from PyQt5.QtGui import QIcon, QPalette, QColor
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, \
+    QFileDialog
 
 from components.device_list import DeviceList
 from components.device_map import DeviceMap
@@ -37,6 +38,7 @@ class Terminal(QMainWindow):
         self.setWindowTitle("qiyuan-terminal")
 
         widget = QWidget(self)
+        widget.setAutoFillBackground(True)
         self.setCentralWidget(widget)
 
         layout = QHBoxLayout()
@@ -48,6 +50,9 @@ class Terminal(QMainWindow):
         layout.addLayout(r_layout)
 
         widget.setLayout(layout)
+        palette = QPalette()
+        palette.setColor(widget.backgroundRole(), QColor(0, 0, 0, 100))
+        widget.setPalette(palette)
 
     def connect_component_signals(self):
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)

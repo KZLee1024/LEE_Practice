@@ -18,7 +18,7 @@ class Terminal(QMainWindow):
 
         self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         self.player.setMedia(QMediaContent(
-            QUrl("rtmp://192.168.0.104:1935/live/test")))
+            QUrl("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8")))
         self.player.setVideoOutput(self.player_container_0)
         self.player.setVolume(5)
         self.player.play()
