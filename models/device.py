@@ -19,11 +19,11 @@ class DeviceType(Enum):
 
     def icon_filename(self) -> str:
         if self.value == 0:
-            return '/assets/icons/toy_car.svg'
+            return '/assets/icons/car.png'
         elif self.value == 1:
-            return '/assets/icons/boat.svg'
+            return '/assets/icons/ship.png'
         elif self.value == 2:
-            return '/assets/icons/plane.svg'
+            return '/assets/icons/UAV.png'
         else:
             return 'undefined'
 
@@ -50,10 +50,71 @@ class Device:
         return [
             Device(DeviceType.UGV, 0, "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
                    {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
-            Device(DeviceType.USV, 1, "rtmp://192.168.0.104:1935/live/test",
+            Device(DeviceType.USV, 0, "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
                    {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
-            Device(DeviceType.UAV, 2, "http://ivi.bupt.edu.cn/hls/cctv3.m3u8",
-                   {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
-            Device(DeviceType.UGV, 3, "http://ivi.bupt.edu.cn/hls/cctv6.m3u8",
-                   {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6))
+            # Device(DeviceType.UAV, 0, "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
+            # Device(DeviceType.UGV, 1, "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 2,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 3,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
+            # Device(DeviceType.USV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
+            # Device(DeviceType.UAV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
+            # Device(DeviceType.UGV, 1,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 2,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 3,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
+            # Device(DeviceType.USV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
+            # Device(DeviceType.UAV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
+            # Device(DeviceType.UGV, 1,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 2,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 3,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "30%", "Latency": "50ms", "Channel": "2421MHz", "Power": "100mW"}, (0.3, 0.3)),
+            # Device(DeviceType.USV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "27%", "Latency": "30ms", "Channel": "2421MHz", "Power": "100mW"}, (0.4, 0.8)),
+            # Device(DeviceType.UAV, 0,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "5%", "Latency": "5ms", "Channel": "2421MHz", "Power": "100mW"}, (0.7, 0.2)),
+            # Device(DeviceType.UGV, 1,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 2,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+            # Device(DeviceType.UGV, 3,
+            #        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+            #        {"Loss Rate": "100%", "Latency": "-", "Channel": "2421MHz", "Power": "100mW"}, (0.8, 0.6)),
+
         ]

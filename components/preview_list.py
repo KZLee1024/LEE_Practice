@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QEvent, pyqtSignal, QModelIndex, Qt, QUrl, QSize
+from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QPushButton, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, \
     QLabel, QScrollArea, QGridLayout
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
@@ -43,6 +44,10 @@ class PreviewList(QScrollArea):
         self.scroll_container.setLayout(layout)
 
         self.setWidget(self.scroll_container)
+        self.scroll_container.setAutoFillBackground(True)
+        palette = QPalette()
+        palette.setColor(self.scroll_container.backgroundRole(), Qt.transparent)
+        self.scroll_container.setPalette(palette)
 
     def change_device_handler(self, new_index):
         if self.selected_preview_index != -1:
@@ -53,7 +58,7 @@ class PreviewList(QScrollArea):
         self.selected_preview_index = new_index
 
         palette = self.previews[self.selected_preview_index].palette()
-        palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.green)
+        palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.red)
         self.previews[self.selected_preview_index].setPalette(palette)
 
     class Preview(QWidget):

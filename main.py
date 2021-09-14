@@ -1,8 +1,9 @@
 import sys
 
 from PyQt5.QtCore import Qt, QDir
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, QFileDialog
+from PyQt5.QtGui import QIcon, QPalette, QColor
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, \
+    QFileDialog
 
 from components.device_list import DeviceList
 from components.device_map import DeviceMap
@@ -34,9 +35,10 @@ class Terminal(QMainWindow):
         self.connect_component_signals()
         self.init_menu_actions()
 
-        self.setWindowTitle("qiyuan-terminal")
+        self.setWindowTitle("Terminal")
 
         widget = QWidget(self)
+        widget.setAutoFillBackground(True)
         self.setCentralWidget(widget)
 
         layout = QHBoxLayout()
@@ -48,6 +50,20 @@ class Terminal(QMainWindow):
         layout.addLayout(r_layout)
 
         widget.setLayout(layout)
+        palette = QPalette()
+        palette.setColor(widget.backgroundRole(), QColor(0, 0, 0, 150))
+        widget.setPalette(palette)
+
+    def showMaximized(self):
+        '''最大化'''
+        # 得到桌面控件
+        desktop = QApplication.desktop()
+        # 得到屏幕可显示尺寸
+        rect = desktop.availableGeometry()
+        # 设置窗口尺寸
+        self.setGeometry(rect)
+        # 设置窗口显示
+        self.show()
 
     def connect_component_signals(self):
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
@@ -56,6 +72,10 @@ class Terminal(QMainWindow):
         self.client.trigger_move_device.connect(self.device_map.move_device_handler)
 
     def init_menu_actions(self):
+        # self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setStyleSheet('''background-color:blue; ''')
+        # self.showMaximized()
         openFileAction = QAction(QIcon("./assets/icons/folder.svg"), "&Open", self)
         openFileAction.setShortcut('Ctrl+O')
         openFileAction.setStatusTip('Open movie')

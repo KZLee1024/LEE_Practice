@@ -7,7 +7,6 @@ import global_pars
 
 from models.device import Device, DeviceType
 
-
 class DeviceMap(QWidget):
     device_list: [Device] = []
     label_list: [QWidget] = []
@@ -15,25 +14,28 @@ class DeviceMap(QWidget):
 
     def __init__(self, device_list: [Device]):
         super().__init__()
-
-        container = QWidget(self)
-        container.setAutoFillBackground(True)
-        container.setFixedSize(global_pars.MAP_WIDTH, global_pars.MAP_HEIGHT)
+        self.count = 1
+        self.container = QWidget(self)
+        self.container.setAutoFillBackground(True)
+        self.container.setFixedSize(global_pars.MAP_WIDTH, global_pars.MAP_HEIGHT)
 
         # container.setStyleSheet('QWidget{background-image: ' + global_pars.BASE_DIR + '/assets/imgs/map-background.jpg}')
         # background.setStyleSheet("background-color: yellow;")
         palette = QPalette()
         palette.setBrush(QPalette.Background, QBrush(QPixmap(global_pars.BASE_DIR + "/assets/imgs/map-background.jpg")))
-        container.setPalette(palette)
+        self.container.setPalette(palette)
 
-        button_move = QPushButton("Move To")
-        button_move.clicked.connect(self.move_to)
+        # button_move = QPushButton("Move To")
+
+        button_hide = QPushButton("地图显示功能")
+        button_hide.setStyleSheet("color:white;font-size:20px;font-family:Roman times;background-color:darkcyan;")
+        button_hide.clicked.connect(self.hide_map)
         h_box = QHBoxLayout()
         h_box.addStretch(1)
-        h_box.addWidget(button_move)
+        h_box.addWidget(button_hide)
 
         layout = QVBoxLayout()
-        layout.addWidget(container)
+        layout.addWidget(self.container)
         layout.addLayout(h_box)
 
         self.setLayout(layout)
@@ -42,7 +44,7 @@ class DeviceMap(QWidget):
         for device in self.device_list:
             pixmap = QPixmap(global_pars.BASE_DIR + device.device_type.icon_filename())
 
-            widget = QWidget(container)
+            widget = QWidget(self.container)
             layout = QVBoxLayout()
             layout.setSpacing(0)
 
@@ -84,6 +86,13 @@ class DeviceMap(QWidget):
                 self.anim.setEndValue(
                     self.coordinate_transform(target_coordinate_x, target_coordinate_y))
                 self.anim.start()
+
+    def hide_map(self):
+        if self.count % 2 != 0:
+            self.container.setHidden(True)
+        else:
+            self.container.setHidden(False)
+        self.count += 1
 
     # click and move
     def mousePressEvent(self, e: QMouseEvent) -> None:
@@ -130,7 +139,7 @@ class DeviceMap(QWidget):
         print('new index: ', new_index)
         self.selected_device_index = new_index
         pe = QPalette()
-        pe.setColor(QPalette.WindowText, Qt.green)
+        pe.setColor(QPalette.WindowText, Qt.red)
         self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
         self.anim.setDuration(100)
         self.anim.setStartValue(self.label_list[self.selected_device_index].size())
