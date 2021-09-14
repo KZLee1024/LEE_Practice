@@ -58,7 +58,7 @@ class PreviewList(QScrollArea):
         self.selected_preview_index = new_index
 
         palette = self.previews[self.selected_preview_index].palette()
-        palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.green)
+        palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.red)
         self.previews[self.selected_preview_index].setPalette(palette)
 
     class Preview(QWidget):
