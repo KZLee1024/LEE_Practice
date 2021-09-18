@@ -27,7 +27,7 @@ class Player:
         print(self.container)
 
         FPS = 1 / int(cap.get(cv2.CAP_PROP_FPS))
-        FPS_MS = int(FPS * 100)
+        FPS_MS = int(FPS * 1000)
 
         print("# DISPLAY_VIDEO --- displaying")
 
