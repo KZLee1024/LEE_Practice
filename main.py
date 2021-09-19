@@ -1,17 +1,17 @@
 import sys
+import threading
 
 from PyQt5.QtCore import Qt, QDir
 from PyQt5.QtGui import QIcon, QPalette, QColor
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, \
-    QFileDialog
+    QFileDialog, QLabel
 
 from components.device_list import DeviceList
 from components.device_map import DeviceMap
-from components.player import Player
 from components.preview_list import PreviewList
-from components.properties_list import PropertiesList
 
 from models.device import Device, DeviceType
+from utlis.player import Player
 from utlis.udp_client import UDPClient
 
 
@@ -92,32 +92,39 @@ class Terminal(QMainWindow):
 
     def play_specific_local_video_handler(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Movie", QDir.homePath())
-        if file_name != ' ':
-            player = Player()
-            player.open_file(file_name)
-            self.show_player(player)
+        # if file_name != ' ':
+            # player = Player()
+            # player.open_file(file_name)
+            # self.show_player()
 
     # TODO: May deliver the player_list[index](preview_list) directly to new window
     def play_specific_stream_handler(self, device):
         if device.device_type != DeviceType.undefined:
-            player = Player()
-            player.open_stream(device.stream_url)
-            self.show_player(player)
+            container = self.show_player()
+            threading.Thread(target=Player(device, container).display).start()
 
-    def show_player(self, player):
+    def show_player(self) -> QLabel:
         window_player = QMainWindow(self)
 
         widget = QWidget(self)
         window_player.setCentralWidget(widget)
 
+        container = QLabel()
+        container.setMinimumWidth(2000)
+        container.setMinimumHeight(1500)
+        container.setText("")
+        container.setObjectName("FullScreenVideo")
+
         layout = QHBoxLayout()
-        layout.addWidget(player)
+        layout.addWidget(container)
         # layout.addWidget(properties)
         widget.setLayout(layout)
 
         window_player.setAttribute(Qt.WA_DeleteOnClose)
-        window_player.resize(1080, 720)
+        window_player.resize(2100, 1600)
         window_player.show()
+
+        return container
 
 
 if __name__ == '__main__':

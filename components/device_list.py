@@ -6,7 +6,6 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 
 # from components.device_list_item_widget import DeviceListItemWidget
-from components.player import Player
 from components.properties_list import PropertiesList
 from models.device import Device
 

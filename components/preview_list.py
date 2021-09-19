@@ -1,62 +1,11 @@
 import threading
 
-import cv2
-import time
-from PyQt5.QtCore import QEvent, pyqtSignal, QModelIndex, Qt, QUrl, QSize
-from PyQt5.QtGui import QPalette, QImage, QPixmap
-from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QPushButton, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, \
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPalette
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, \
     QLabel, QScrollArea, QGridLayout
-from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget
 
-from models.device import Device
-
-
-class Preview:
-    FPS = -1
-    FPS_MS = -1
-
-    def __init__(self, device, container):
-        self.device = device
-        self.container = container
-
-    def display(self):
-        print("# DISPLAY_VIDEO --- loading")
-        cap = cv2.VideoCapture(self.device.stream_url)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
-
-        print(self.container)
-
-        FPS = 1 / int(cap.get(cv2.CAP_PROP_FPS))
-        FPS_MS = int(FPS * 1000)
-
-        print("# DISPLAY_VIDEO --- displaying")
-
-        while cap.isOpened():
-            success, frame = cap.read()
-            time.sleep(FPS)
-            if success:
-                img = frame.copy()
-                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-                # Keep width-height ratio and Resize
-                container_width, container_height = 360, 320
-                width, height = img.shape[1], img.shape[0]
-                if width / height >= container_width / container_height:
-                    img = cv2.resize(img, (container_width, int(height * container_width / width)))
-                else:
-                    img = cv2.resize(img, (int(width * container_height / height), container_height))
-                img = QImage(img.data, img.shape[1], img.shape[0], QImage.Format_RGB888)
-
-                self.container.setPixmap(QPixmap.fromImage(img))
-            else:
-                self.container.clear()
-                break
-
-        try:
-            cap.release()
-        except:
-            print("# ERROR @ Resource Release")
+from utlis.player import Player
 
 
 class PreviewList(QScrollArea):
@@ -99,7 +48,7 @@ class PreviewList(QScrollArea):
             layout.addWidget(widget, row, col)
             self.previews.append(widget)
 
-            threading.Thread(target=Preview(self.devices[index], new_preview).display).start()
+            threading.Thread(target=Player(self.devices[index], new_preview).display).start()
 
             if index % 2 == 0:
                 col = 1
