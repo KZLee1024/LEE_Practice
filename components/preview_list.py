@@ -26,8 +26,11 @@ class PreviewList(QScrollArea):
 
         for index in range(len(self.devices)):
             new_preview = QLabel()
-            new_preview.setMinimumWidth(360)
-            new_preview.setMinimumHeight(320)
+            new_preview.setFixedSize(360, 320)
+            # new_preview.setMinimumWidth(360)
+            # new_preview.setMaximumWidth(360)
+            # new_preview.setMinimumHeight(320)
+            # new_preview.setMaximumHeight(320)
             new_preview.setText("")
             new_preview.setObjectName("video-" + str(index))
 
@@ -48,7 +51,7 @@ class PreviewList(QScrollArea):
             layout.addWidget(widget, row, col)
             self.previews.append(widget)
 
-            threading.Thread(target=Player(self.devices[index], new_preview).display).start()
+            threading.Thread(target=Player(container=new_preview, device=self.devices[index]).display).start()
 
             if index % 2 == 0:
                 col = 1
