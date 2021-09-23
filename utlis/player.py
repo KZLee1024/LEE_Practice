@@ -19,18 +19,21 @@ class Player:
 
     def __init__(self, container, device=None, local_file=None):
         self.container: QLabel = container
-        if device is not None:
-            self.cap = cv2.VideoCapture(device.stream_url)
-        else:
-            self.cap = cv2.VideoCapture(local_file)
+        self.device = device
+        self.local_file = local_file
 
     def display(self):
         print("# DISPLAY_VIDEO --- loading")
-        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
+        if self.device is not None:
+            cap = cv2.VideoCapture(self.device.stream_url)
+        else:
+            cap = cv2.VideoCapture(self.local_file)
+
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 
         print(self.container)
 
-        FPS = 1 / int(self.cap.get(cv2.CAP_PROP_FPS))
+        FPS = 1 / int(cap.get(cv2.CAP_PROP_FPS))
         FPS_MS = int(FPS * 1000)
 
         print("# DISPLAY_VIDEO --- displaying")
