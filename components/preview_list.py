@@ -51,7 +51,7 @@ class PreviewList(QScrollArea):
             layout.addWidget(widget, row, col)
             self.previews.append(widget)
 
-            threading.Thread(target=Player(container=new_preview, device=self.devices[index]).display).start()
+            threading.Thread(target=Player(container=new_preview, device=self.devices[index]).display, daemon=True).start()
 
             if index % 2 == 0:
                 col = 1

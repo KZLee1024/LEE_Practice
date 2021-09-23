@@ -1,6 +1,8 @@
+import threading
 import time
 
 import cv2
+import sip
 
 from global_pars import BASE_DIR
 
@@ -38,12 +40,17 @@ class Player:
 
         print("# DISPLAY_VIDEO --- displaying")
 
-        while self.cap.isOpened():
-            success, frame = self.cap.read()
+        while cap.isOpened():
+            print(threading.active_count())
+            # print("playing...")
+            success, frame = cap.read()
             time.sleep(FPS)
             if success:
                 img = frame.copy()
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+                if sip.isdeleted(self.container):
+                    break
 
                 # Keep width-height ratio while resizing
                 container_width, container_height = self.container.size().width(), self.container.size().height()
@@ -60,6 +67,6 @@ class Player:
                 break
 
         try:
-            self.cap.release()
+            cap.release()
         except:
             print("# ERROR @ Resource Release")

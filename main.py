@@ -100,7 +100,7 @@ class Terminal(QMainWindow):
     def play_specific_stream_handler(self, device):
         if device.device_type != DeviceType.undefined:
             container = self.show_player()
-            threading.Thread(target=Player(container=container, device=device).display).start()
+            threading.Thread(target=Player(container=container, device=device).display, daemon=True).start()
 
     def show_player(self) -> QLabel:
         window_player = QMainWindow(self)
