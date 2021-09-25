@@ -80,6 +80,11 @@ class DeviceList(QTableWidget):
         # self.trigger_change_device_for_properties.emit(self.devices[current.data(SIGNAL_PARAMETERS['DEVICE_ID'])].properties)
         self.trigger_change_device_for_map.emit(current_row)
         # self.trigger_play.emit(self.devices[current_row])
+
     # TODO: May deliver the player_list[index](preview_list) directly to new window
     def play_specific_device(self, row):
         self.trigger_play.emit(self.devices[row])
+
+    def update_parameter_handler(self, device_index, pars:dict):
+        print(device_index)
+        print(pars)

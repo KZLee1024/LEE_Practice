@@ -70,7 +70,9 @@ class Terminal(QMainWindow):
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
         self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
         self.device_list.trigger_play.connect(self.play_specific_stream_handler)
+
         self.client.trigger_move_device.connect(self.device_map.move_device_handler)
+        self.client.trigger_update_parameter.connect(self.device_list.update_parameter_handler)
 
     def init_menu_actions(self):
         openFileAction = QAction(QIcon("./assets/icons/folder.svg"), "&Open", self)
@@ -82,10 +84,10 @@ class Terminal(QMainWindow):
         file_menu.addAction(openFileAction)
 
     def full_screen(self):
-        self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.FramelessWindowHint)
         # self.setStyleSheet('''background-color:blue; ''')
-        # self.showMaximized()
+        self.showMaximized()
 
     def center(self):
         qr = self.frameGeometry()
