@@ -41,7 +41,7 @@ class Player:
         print("# DISPLAY_VIDEO --- displaying")
 
         while cap.isOpened():
-            print(threading.active_count())
+            # print(threading.active_count())
             # print("playing...")
             success, frame = cap.read()
             time.sleep(FPS)

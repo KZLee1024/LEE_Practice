@@ -29,11 +29,12 @@ class Terminal(QMainWindow):
         self.device_map = DeviceMap(devices)
         self.preview_list = PreviewList(devices)
 
-        self.statusBar()
+        # self.statusBar()
         self.menu_bar = self.menuBar()
 
         self.connect_component_signals()
         self.init_menu_actions()
+        self.full_screen()
 
         self.setWindowTitle("Terminal")
 
@@ -72,17 +73,19 @@ class Terminal(QMainWindow):
         self.client.trigger_move_device.connect(self.device_map.move_device_handler)
 
     def init_menu_actions(self):
-        # self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
-        # self.setWindowFlags(Qt.FramelessWindowHint)
-        # self.setStyleSheet('''background-color:blue; ''')
-        # self.showMaximized()
         openFileAction = QAction(QIcon("./assets/icons/folder.svg"), "&Open", self)
         openFileAction.setShortcut('Ctrl+O')
-        openFileAction.setStatusTip('Open movie')
+        # openFileAction.setStatusTip('Open movie')
         openFileAction.triggered.connect(self.play_specific_local_video_handler)
 
         file_menu = self.menu_bar.addMenu(' &File')
         file_menu.addAction(openFileAction)
+
+    def full_screen(self):
+        self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setStyleSheet('''background-color:blue; ''')
+        # self.showMaximized()
 
     def center(self):
         qr = self.frameGeometry()
@@ -131,5 +134,6 @@ if __name__ == '__main__':
     terminal = Terminal()
     # terminal.resize(1280, 720)
     terminal.center()
-    terminal.show()
+    # terminal.show()
+    terminal.showFullScreen()
     sys.exit(app.exec_())
