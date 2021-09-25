@@ -47,7 +47,7 @@ class UDPClient(QObject):
 
     def handle_recv_parameter(self, recv_data):
         recv_data = recv_data[len('deviceParameter'):].split(' ')
-        print(recv_data)
+        # print(recv_data)
 
         # ================== 获得属性key-value对 =================== #
         # ======= deviceParameter device_index key value ========= #
@@ -59,7 +59,7 @@ class UDPClient(QObject):
             if global_pars.PARAMETER_KEYS.__contains__(data[0]):
                 pars[data[0]] = data[1]
 
-        print(device_index, pars)
+        # print(device_index, pars)
         assert device_index >= 0
         self.trigger_update_parameter.emit(device_index, pars)
 
