@@ -15,6 +15,7 @@ PyQt5 - PyQt 5.15.4
 # install package
 
 pip install PyQt5
+pip install opencv-python
 
 python main.py / python3 main.py
 ```
