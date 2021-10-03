@@ -69,7 +69,6 @@ class Terminal(QMainWindow):
     def connect_component_signals(self):
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
         self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
-        self.device_list.trigger_play.connect(self.play_specific_stream_handler)
 
         self.client.trigger_move_device.connect(self.device_map.move_device_handler)
         self.client.trigger_update_parameter.connect(self.device_list.update_parameter_handler)
@@ -98,16 +97,10 @@ class Terminal(QMainWindow):
     def play_specific_local_video_handler(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Movie", QDir.homePath())
         print(file_name)
-        container = self.show_player()
+        container = self.show_local_video_player()
         threading.Thread(target=Player(container=container, local_file=file_name).display).start()
 
-    # TODO: May deliver the player_list[index](preview_list) directly to new window
-    def play_specific_stream_handler(self, device):
-        if device.device_type != DeviceType.undefined:
-            container = self.show_player()
-            threading.Thread(target=Player(container=container, device=device).display, daemon=True).start()
-
-    def show_player(self) -> QLabel:
+    def show_local_video_player(self) -> QLabel:
         window_player = QMainWindow(self)
 
         widget = QWidget(self)
@@ -137,5 +130,5 @@ if __name__ == '__main__':
     # terminal.resize(1280, 720)
     terminal.center()
     # terminal.show()
-    terminal.showFullScreen()
+    # terminal.showFullScreen()
     sys.exit(app.exec_())

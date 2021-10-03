@@ -16,8 +16,8 @@ def getArg(flag, default=None):
     return default
 
 
-device_limit = int(getArg("-ld", 4))
-message_limit = int(getArg("-lm", 10))
+device_limit = int(getArg("-ld", 2))
+message_limit = int(getArg("-lm", 50))
 
 client_ip = getArg("-i", "127.0.0.1")
 client_port = int(getArg("-p", 8888))
@@ -67,13 +67,13 @@ def send_parameters_message(device_index=0):
         send_data += str(device_index) + ' '
 
         send_data += 'Loss-Rate:'
-        send_data += str(random.randint(1, 100) / 100) + ' '
+        send_data += str(random.randint(0, 100)) + ' '
 
         send_data += 'Latency:'
-        send_data += str(random.randint(5, 80)) + ' '
+        send_data += str(random.randint(0, 100)) + ' '
 
         send_data += 'Channel:'
-        send_data += str(2421) + ' '
+        send_data += str(int(random.random()*2) + 2421) + ' '
 
         send_data += 'Power:'
         send_data += str(POWER[int(random.randint(0, 3))])
