@@ -17,73 +17,6 @@ import random
 import numpy as np
 
 
-class Terminal(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        widget = QWidget()
-        self.setCentralWidget(widget)
-
-        widget.setFixedSize(800, 600)
-
-        self.start_button = QPushButton('Start')
-        self.end_button = QPushButton('end')
-        self.start_button.clicked.connect(self.start_timer)
-        self.end_button.clicked.connect(self.end_timer)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.show_time)
-
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
-
-        h_box = QHBoxLayout()
-        h_box.addWidget(self.start_button)
-        h_box.addWidget(self.end_button)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.canvas)
-        layout.addLayout(h_box)
-
-        widget.setLayout(layout)
-
-        self.num_a_list = []
-        self.num_b_list = []
-        self.num_c_list = []
-
-    def show_time(self):
-        ax = self.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-
-        ax.clear()
-        ax.plot(self.num_a_list, label='A', linestyle=':', color='g')
-        ax.plot(self.num_b_list, label='B', linestyle='--', color='b')
-        ax.plot(self.num_c_list, label='C', linestyle='-.', color='r')
-
-        self.figure.legend()
-        self.canvas.draw()
-        plt.grid(True)
-
-    def start_timer(self):
-        self.timer.start(100)
-        self.start_button.setEnabled(False)
-        self.end_button.setEnabled(True)
-
-    def end_timer(self):
-        self.timer.stop()
-        self.start_button.setEnabled(True)
-        self.end_button.setEnabled(False)
-
-        self.num_a_list = []
-        self.num_b_list = []
-        self.num_c_list = []
-
-    def center(self):
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
-
-
 class App(QWidget):
     def __init__(self, parent=None):
         # 父类初始化方法
@@ -107,17 +40,18 @@ class App(QWidget):
         self.timer.timeout.connect(self.showTime)
         # 图像模块
         self.figure = plt.figure()
+        # plt.ion()
 
         self.canvas = FigureCanvas(self.figure)
         # 垂直布局
 
-        # x = np.linspace(0, np.pi)
-        # y_sin = np.sin(x)
-        # y_cos = np.cos(x)
-        #
-        # ax = self.figure.add_subplot(221)
-        # ax.plot(x, y_sin)
-        # ax.plot(x, y_cos)
+        x = np.linspace(0, 4 * np.pi)
+        y_sin = np.sin(x)
+        y_cos = np.cos(x)
+
+        ax = self.figure.add_subplot(221)
+        ax.plot(x, y_sin)
+        ax.plot(x, y_cos)
 
         layout = QVBoxLayout()
         layout.addWidget(self.startBtn)
@@ -126,7 +60,7 @@ class App(QWidget):
         self.setLayout(layout)
 
         # 数组初始化
-        self.people_num_list = [-1 for _ in range(30)]
+        self.people_num_list = []
         self.cars_num_list = []
         self.motors_num_list = []
 
@@ -145,13 +79,17 @@ class App(QWidget):
         # shuju_2=np.random.random_sample()*10#返回一个[0,1)之间的浮点型随机数*10
         # self.x.append(shuju)#数组更新
         # self.xx.append(shuju_2)
+        plt.clf()
 
         ax = self.figure.add_subplot(111)
 
         ax.clear()
-        ax.plot(range(30), self.people_num_list, label="people_num", linestyle='-', color="g")
+        ax.plot(self.people_num_list, label="people_num", linestyle='-', color="g")
         # ax.plot(self.cars_num_list, label="cars_num", color="b", linestyle='--')
         # ax.plot(self.motors_num_list, label="motors_num", color="r", linestyle='-')
+
+        ax.set_xlim(0, 30)
+        ax.set_xticks([])
 
         # self.figure.legend()
         self.canvas.draw()
@@ -168,7 +106,7 @@ class App(QWidget):
         self.timer.stop()  # 计时停止
         self.startBtn.setEnabled(True)  # 开始按钮变为可用
         self.endBtn.setEnabled(False)  # 结束按钮变为可用
-        self.people_num_list = [-1 for _ in range(30)]
+        self.people_num_list = []
         self.cars_num_list = []
         self.motors_num_list = []
 
@@ -188,12 +126,91 @@ class App(QWidget):
             time.sleep(0.5)
 
 
+class Terminal(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        widget = QWidget()
+        self.setCentralWidget(widget)
+
+        widget.setMaximumWidth(500)
+        widget.setMinimumHeight(800)
+
+        self.start_button = QPushButton('Start')
+        self.end_button = QPushButton('end')
+        self.start_button.clicked.connect(self.start_timer)
+        self.end_button.clicked.connect(self.end_timer)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.draw)
+
+        self.figure = plt.Figure()
+        self.canvas = FigureCanvas(self.figure)
+
+        buttons_box = QHBoxLayout()
+        buttons_box.addWidget(self.start_button)
+        buttons_box.addWidget(self.end_button)
+
+        layout = QVBoxLayout()
+        layout.addLayout(buttons_box)
+        layout.addWidget(self.canvas)
+
+        widget.setLayout(layout)
+
+        self.pars_label = ['loss rate', 'latency', 'channel', 'power']
+        self.data_lists = [[] for _ in range(4)]
+
+        threading.Thread(target=self.push_data, daemon=True).start()
+
+    def draw(self):
+        self.figure.clf()
+
+        axes = self.figure.subplots(4, 1)
+
+        for ax, data, label in zip(axes, self.data_lists, self.pars_label):
+            ax.plot(data, color='g')
+            ax.set_xlim(0, 30)
+            ax.set_xticks([])
+            ax.set_xlabel(label)
+
+        self.canvas.draw()
+        plt.grid(True)
+
+    def start_timer(self):
+        self.timer.start(50)
+        self.start_button.setEnabled(False)
+        self.end_button.setEnabled(True)
+
+    def end_timer(self):
+        self.timer.stop()
+        self.start_button.setEnabled(True)
+        self.end_button.setEnabled(False)
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def push_data(self):
+        while True:
+            pars = [random.randint(0, 100), random.randint(0, 100), int(random.random() * 2) + 2421,
+                    100 + random.randint(0, 30)]
+            print(pars)
+
+            for data_list, data in zip(self.data_lists, pars):
+                data_list.append(data)
+                if len(data_list) > 30:
+                    data_list.pop(0)
+
+            time.sleep(0.5)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    w = App()
-    w.show()
-    # terminal = Terminal()
-    # terminal.resize(1000, 500)
-    # terminal.center()
-    # terminal.show()
+    # w = App()
+    # w.show()
+    terminal = Terminal()
+    terminal.center()
+    terminal.show()
     sys.exit(app.exec_())
