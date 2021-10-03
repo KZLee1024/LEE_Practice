@@ -62,7 +62,7 @@ class DeviceList(QTableWidget):
         for row in range(len(self.devices)):
             self.setItem(row, 0, QTableWidgetItem(self.devices[row].title()))
 
-            self.setHorizontalHeaderItem(len(self.pars_label) + 1, QTableWidgetItem("全屏显示"))
+            self.setHorizontalHeaderItem(len(self.pars_label) + 1, QTableWidgetItem("详情显示"))
             self.btn_list[row].setDown(False)
             self.btn_list[row].setStyleSheet("QPushButton{margin:5px};")
             self.btn_list[row].setStyleSheet("color:black;font-size:25px;font-weight:bold;font-family:Roman times;")
