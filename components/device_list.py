@@ -122,8 +122,8 @@ class DeviceList(QTableWidget):
             if key == 'Loss-Rate':
                 oldLabel = self.item(device_index, col).text()
                 if oldLabel != '-':
-                    oldValue = int(oldLabel[:-1])
-                newValue = int(value)
+                    oldValue = float(oldLabel[:-1])
+                newValue = round(value, 2)
                 newLabel = str(newValue) + '%'
                 self.properties[device_index]['Loss-Rate'].append(newValue)
                 if len(self.properties[device_index]['Loss-Rate']) > 5:
@@ -132,8 +132,8 @@ class DeviceList(QTableWidget):
             elif key == 'Latency':
                 oldLabel = self.item(device_index, col).text()
                 if oldLabel != '-':
-                    oldValue = int(oldLabel[:-2])
-                newValue = int(value)
+                    oldValue = float(oldLabel[:-2])
+                newValue = round(value, 2)
                 newLabel = str(newValue) + 'ms'
                 self.properties[device_index]['Latency'].append(newValue)
                 if len(self.properties[device_index]['Latency']) > 5:

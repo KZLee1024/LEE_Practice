@@ -93,8 +93,8 @@ def send_parameters_message(device_index=0):
 if __name__ == '__main__':
     semaphore = threading.BoundedSemaphore(device_limit)
     for i in range(device_limit):
-        threading.Thread(target=send_position_message, args=(i,)).start()
-        # threading.Thread(target=send_parameters_message, args=(i,)).start()
+        # threading.Thread(target=send_position_message, args=(i,)).start()
+        threading.Thread(target=send_parameters_message, args=(i,)).start()
 
 
 while threading.active_count() != 1:
