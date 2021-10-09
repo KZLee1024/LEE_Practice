@@ -5,6 +5,7 @@ import time
 
 # from utlis.arg_parser import getArg
 from sys import argv
+import struct
 
 
 def getArg(flag, default=None):
@@ -31,20 +32,21 @@ def send_position_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
-        time.sleep(random.random() * 10)
+        # Time Gap
+        time.sleep(random.random() * 5)
 
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
 
-        x = int(random.random() * 100)
-        y = int(random.random() * 100)
+        x = random.random() * 100
+        y = random.random() * 100
 
-        send_data = 'devicePosition:'
-        send_data = send_data + str(device_index)
-        send_data = send_data + 'x:' + str(x)
-        send_data = send_data + 'y:' + str(y)
+        # send_data = [b'devicePosition:']
+        send_data = [device_index, x, y]
 
-        udp_socket.sendto(send_data.encode("utf-8"), client_address)
+        print(len(send_data), send_data)
+        send_data = struct.pack('iff', send_data[0], send_data[1], send_data[2])
+        udp_socket.sendto(send_data, client_address)
         print('message sent: ', send_data)
 
     semaphore.release()
@@ -61,24 +63,28 @@ def send_parameters_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
+        # Time Gap
         time.sleep(1)
-        # TODO: send all parameters or only the changed part?
-        send_data = 'deviceParameter'
-        send_data += str(device_index) + ' '
 
-        send_data += 'Loss-Rate:'
-        send_data += str(random.randint(0, 100)) + ' '
+        send_data = []
+        send_data.append(device_index)
 
-        send_data += 'Latency:'
-        send_data += str(random.randint(0, 100)) + ' '
+        send_data.append('Loss-Rate'.encode('utf-8'))
+        send_data.append(random.random() * 100)
 
-        send_data += 'Channel:'
-        send_data += str(int(random.random()*2) + 2421) + ' '
+        send_data.append('Latency'.encode('utf-8'))
+        send_data.append(random.random() * 100)
 
-        send_data += 'Power:'
-        send_data += str(POWER[int(random.randint(0, 3))])
+        send_data.append('Channel'.encode('utf-8'))
+        send_data.append(int(random.random() * 2) + 2421)
 
-        udp_socket.sendto(send_data.encode("utf-8"), client_address)
+        send_data.append('Power'.encode('utf-8'))
+        send_data.append(POWER[random.randint(0, 3)])
+
+        print(len(send_data), send_data)
+        send_data = struct.pack('i9sf7sf7si5si', send_data[0], send_data[1], send_data[2], send_data[3], send_data[4],
+                                send_data[5], send_data[6], send_data[7], send_data[8])
+        udp_socket.sendto(send_data, client_address)
         print('message sent: ', send_data)
 
     semaphore.release()
@@ -87,9 +93,9 @@ def send_parameters_message(device_index=0):
 if __name__ == '__main__':
     semaphore = threading.BoundedSemaphore(device_limit)
     for i in range(device_limit):
-        # t = threading.Thread(target=send_position_message, args=(i,))
-        t = threading.Thread(target=send_parameters_message, args=(i,))
-        t.start()
+        threading.Thread(target=send_position_message, args=(i,)).start()
+        # threading.Thread(target=send_parameters_message, args=(i,)).start()
+
 
 while threading.active_count() != 1:
     pass
