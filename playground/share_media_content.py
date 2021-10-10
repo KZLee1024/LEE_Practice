@@ -1,10 +1,16 @@
 import sys
+import threading
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton, \
+    QLabel
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
+from models.device import Device
+from utlis.player import Player
+
+devices = Device.sample()
 
 class Terminal(QMainWindow):
     def __init__(self):
@@ -12,16 +18,12 @@ class Terminal(QMainWindow):
 
         widget = QWidget()
 
-        self.player_container_0 = QVideoWidget()
-        self.player_container_1 = QVideoWidget()
-        # player_container_0.setGeometry(0,0,480, 360)
+        self.player_container_0 = QLabel()
+        self.player_container_1 = QLabel()
 
-        self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.player.setMedia(QMediaContent(
-            QUrl("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8")))
-        self.player.setVideoOutput(self.player_container_0)
-        self.player.setVolume(5)
-        self.player.play()
+        self.player = Player(self.player_container_0, device=devices[0])
+
+        threading.Thread(target=self.player.display, daemon=True).start()
 
         self.button_20 = QPushButton("<-")
         self.button_20.setMaximumWidth(100)
@@ -45,10 +47,10 @@ class Terminal(QMainWindow):
         self.setCentralWidget(widget)
 
     def switch_to_0(self):
-        self.player.setVideoOutput(self.player_container_0)
+        self.player.switch_container()
 
     def switch_to_1(self):
-        self.player.setVideoOutput(self.player_container_1)
+        self.player.switch_container(self.player_container_1)
 
     def center(self):
         qr = self.frameGeometry()

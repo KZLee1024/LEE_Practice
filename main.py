@@ -69,6 +69,8 @@ class Terminal(QMainWindow):
     def connect_component_signals(self):
         self.device_list.trigger_change_device_for_map.connect(self.device_map.change_device_handler)
         self.device_list.trigger_change_device_for_map.connect(self.preview_list.change_device_handler)
+        self.device_list.trigger_switch_container_for_detail.connect(self.preview_list.switch_container_handler)
+        self.device_list.trigger_close_device_detail.connect(self.preview_list.switch_container_handler)
 
         self.client.trigger_move_device.connect(self.device_map.move_device_handler)
         self.client.trigger_update_parameter.connect(self.device_list.update_parameter_handler)

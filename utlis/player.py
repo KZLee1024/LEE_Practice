@@ -19,10 +19,23 @@ class Player:
     FPS = -1
     FPS_MS = -1
 
+    is_switching = False
+    past_container = None
+
     def __init__(self, container, device=None, local_file=None):
         self.container: QLabel = container
         self.device = device
         self.local_file = local_file
+
+    def switch_container(self, new_container=None):
+        print('switching container in PLAYER, new_container is', new_container)
+        self.is_switching = True
+        if new_container is not None:
+            self.past_container = self.container
+            self.container = new_container
+        else:
+            self.container = self.past_container
+        self.is_switching = False
 
     def display(self):
         print("# DISPLAY_VIDEO --- loading")
@@ -43,8 +56,18 @@ class Player:
         while cap.isOpened():
             # print(threading.active_count())
             # print("playing...")
+
+            # ENSURE the Capture has something to show
+            if not cap.isOpened():
+                break
+
             success, frame = cap.read()
             time.sleep(FPS)
+
+            # ENSURE the Instance is not in the process of switching container
+            if self.is_switching:
+                continue
+
             if success:
                 img = frame.copy()
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)

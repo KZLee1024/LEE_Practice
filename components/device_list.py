@@ -23,6 +23,8 @@ class DeviceList(QTableWidget):
     trigger_change_device_for_map = pyqtSignal(int)
     trigger_change_device_for_previews = pyqtSignal(int)
 
+    trigger_switch_container_for_detail = pyqtSignal(int, QLabel)
+    trigger_close_device_detail = pyqtSignal(int)
     # TODO:
     trigger_update_parameters_for_device_detail = pyqtSignal(int, dict)
 
@@ -99,12 +101,18 @@ class DeviceList(QTableWidget):
     def play_specific_device(self, device_index):
         print('generating full-screen player')
         self.deviceDetail = DeviceDetails(device_index, self.devices[device_index], self.properties[device_index])
+        # ready for window close
+        self.deviceDetail.trigger_close_device_detail.connect(self.close_device_detail)
 
+        self.trigger_switch_container_for_detail.emit(device_index, self.deviceDetail.get_player_container())
         self.trigger_update_parameters_for_device_detail.connect(self.deviceDetail.push_data_handler)
 
         self.deviceDetail.setAttribute(Qt.WA_DeleteOnClose)
         # self.deviceDetail.resize(2100, 1600)
         self.deviceDetail.show()
+
+    def close_device_detail(self, device_index):
+        self.trigger_close_device_detail.emit(device_index)
 
     def update_parameter_handler(self, device_index, pars: dict):
         print(device_index, pars)

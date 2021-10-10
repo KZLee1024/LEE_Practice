@@ -9,7 +9,8 @@ from utlis.player import Player
 
 
 class PreviewList(QScrollArea):
-    previews = []
+    preview_container = []
+    players: [Player] = []
     selected_preview_index = -1
 
     def __init__(self, devices):
@@ -49,9 +50,12 @@ class PreviewList(QScrollArea):
             widget.setAutoFillBackground(True)
 
             layout.addWidget(widget, row, col)
-            self.previews.append(widget)
+            self.preview_container.append(widget)
 
-            threading.Thread(target=Player(container=new_preview, device=self.devices[index]).display, daemon=True).start()
+            player = Player(container=new_preview, device=self.devices[index])
+            self.players.append(player)
+
+            threading.Thread(target=player.display, daemon=True).start()
 
             if index % 2 == 0:
                 col = 1
@@ -59,11 +63,11 @@ class PreviewList(QScrollArea):
                 col = 0
                 row += 1
 
-        if len(self.previews) > 0:
+        if len(self.preview_container) > 0:
             self.change_device_handler(0)
 
-        print(len(self.previews))
-        print(self.previews[0])
+        print(len(self.preview_container))
+        print(self.preview_container[0])
         self.scroll_container.setLayout(layout)
 
         self.setWidget(self.scroll_container)
@@ -74,12 +78,16 @@ class PreviewList(QScrollArea):
 
     def change_device_handler(self, new_index):
         if self.selected_preview_index != -1:
-            palette = self.previews[self.selected_preview_index].palette()
-            palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.transparent)
-            self.previews[self.selected_preview_index].setPalette(palette)
+            palette = self.preview_container[self.selected_preview_index].palette()
+            palette.setColor(self.preview_container[self.selected_preview_index].backgroundRole(), Qt.transparent)
+            self.preview_container[self.selected_preview_index].setPalette(palette)
 
         self.selected_preview_index = new_index
 
-        palette = self.previews[self.selected_preview_index].palette()
-        palette.setColor(self.previews[self.selected_preview_index].backgroundRole(), Qt.red)
-        self.previews[self.selected_preview_index].setPalette(palette)
+        palette = self.preview_container[self.selected_preview_index].palette()
+        palette.setColor(self.preview_container[self.selected_preview_index].backgroundRole(), Qt.red)
+        self.preview_container[self.selected_preview_index].setPalette(palette)
+
+    def switch_container_handler(self, device_index, full_screen_container=None):
+        print('Preview list has received container switching message, new container is ', full_screen_container)
+        self.players[device_index].switch_container(full_screen_container)
