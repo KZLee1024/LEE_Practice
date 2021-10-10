@@ -92,7 +92,7 @@ class DeviceList(QTableWidget):
 
         for row in range(len(self.devices)):
             # self.btn_list[row].clicked.connect(lambda _, row=row: self.trigger_play.emit(self.devices[row]))
-            self.btn_list[row].clicked.connect(self.play_specific_device)
+            self.btn_list[row].clicked.connect(lambda _, row=row: self.play_specific_device(row))
 
     def change_device(self, current_row):
         self.trigger_change_device_for_map.emit(current_row)
@@ -178,5 +178,3 @@ class DeviceList(QTableWidget):
             self.item(device_index, col).setForeground(color)
 
         self.trigger_update_parameters_for_device_detail.emit(device_index, full_screen_pars)
-
-
