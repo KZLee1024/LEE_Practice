@@ -21,35 +21,49 @@ class UDPClient(QObject):
     def handle_recv(self):
         recv_data, ip, port = self.udp_client.readDatagram(1024)
 
-        if len(recv_data) == 12:
+        prefix=recv_data[0:8].decode()
+
+
+        if prefix == "position":
             self.handle_recv_position(recv_data)
-        elif len(recv_data) == 56:
+        elif prefix == "videoifo":
             self.handle_recv_parameter(recv_data)
+        elif prefix == "detectif":
+            self.handle_recv_detct(recv_data)
 
-    def handle_recv_position(self, recv_data):
-        recv_data = struct.unpack('iff', recv_data)
-        print('message received', recv_data)
 
-        device_index = recv_data[0]
-        x = recv_data[1]
-        y = recv_data[2]
+    def handle_recv_position(self, recv_data1):
+        recv_data=recv_data1.decode('utf-8')
+        print(recv_data)
+        recv_data = filter(str.isalnum, str(recv_data))
+        recv_data = ''.join(list(recv_data))
+        print(recv_data)
+        if recv_data.startswith('p'):
+            recv_data = recv_data[len('position'):]
+            print(recv_data)
 
-        print((device_index, x, y))
-        assert device_index >= 0 and x >= 0 and y >= 0
-        self.trigger_move_device.emit(device_index, x, y)
+            # ======= 获得坐标值 ========= #
+            device_index = int(recv_data[0])
+            x = int(recv_data.split('x')[1].split('y')[0])
+            y = int(recv_data.split('x')[1].split('y')[1])
+
+            print((device_index, x, y))
+            assert device_index >= 0 and x >= 0 and y >= 0
+            self.trigger_move_device.emit(device_index, x, y)
 
     def handle_recv_parameter(self, recv_data):
-        recv_data = struct.unpack('i9sf7sf7si5si', recv_data)
-        print('message received', recv_data)
+        detail=struct.unpack("iffii", recv_data[8:len(recv_data)])
+        print("videoinfo:",detail)
 
-        device_index = recv_data[0]
-        recv_data = recv_data[1:]
+        device_index = detail[0]
 
-        pars = {}
-        for index in range(len(global_pars.PARAMETER_KEYS)):
-            key = recv_data[index*2].decode('utf-8')
-            if global_pars.PARAMETER_KEYS.__contains__(key):
-                pars[key] = recv_data[index*2+1]
+    def handle_recv_detct(self, recv_data):
+        name_len = struct.unpack("i", recv_data[8:12])
+        name2 = recv_data[12:12 + name_len[0]].decode()
+        detail=struct.unpack("iffiiii", recv_data[12 + name_len[0]:len(recv_data)])
+        device_index=detail[0]
+        accuracy=detail[1]
+        distance=detail[2]
 
-        assert device_index >= 0
-        self.trigger_update_parameter.emit(device_index, pars)
+
+        print("detectinfo:",name_len,name2,detail)
