@@ -117,10 +117,10 @@ class DeviceMap(QWidget):
     def coordinate_transform(self, target_coordinate_x: float, target_coordinate_y: float) -> QPoint:
         # Waiting for Coordinate Signal
         # return clickPos directly now
-        if target_coordinate_x > 0.85:
-            target_coordinate_x = 0.85
-        if target_coordinate_y > 0.8:
-            target_coordinate_y = 0.8
+        if target_coordinate_x > 0.93:
+            target_coordinate_x = 0.93
+        if target_coordinate_y > 0.75:
+            target_coordinate_y = 0.75
 
         return QPoint(int(self.geometry().width() * target_coordinate_x), int(self.geometry().height() * target_coordinate_y))
 
@@ -151,5 +151,5 @@ class DeviceMap(QWidget):
         self.anim = QPropertyAnimation(self.label_list[device_index], b"pos")
         self.anim.setDuration(2000)
         self.anim.setStartValue(self.label_list[device_index].pos())
-        self.anim.setEndValue(self.coordinate_transform(x/100, y/100))
+        self.anim.setEndValue(self.coordinate_transform(x/global_pars.BASE_WIDTH, y/global_pars.BASE_HEIGHT))
         self.anim.start()

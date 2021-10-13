@@ -32,13 +32,14 @@ def send_position_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
-        time.sleep(random.random() * 10)
+        # time.sleep(random.random() * 20)
+        time.sleep(3)
 
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
 
-        x = int(random.random() * 100)
-        y = int(random.random() * 100)
+        x = int(random.random() * 650)
+        y = int(random.random() * 350)
 
         send_data = 'position'
         send_data = send_data + str(device_index)
