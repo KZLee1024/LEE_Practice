@@ -117,9 +117,9 @@ def send_detect_message(device_index=0):
 if __name__ == '__main__':
     semaphore = threading.BoundedSemaphore(device_limit)
     for i in range(device_limit):
-        w = threading.Thread(target=send_position_message, args=(i,))
-        t = threading.Thread(target=send_parameters_message, args=(i,))
-        z = threading.Thread(target=send_detect_message, args=(i,))
+        w = threading.Thread(target=send_position_message, args=(i,), daemon=True)
+        t = threading.Thread(target=send_parameters_message, args=(i,), daemon=True)
+        z = threading.Thread(target=send_detect_message, args=(i,), daemon=True)
         # z.start()
         # t.start()
         w.start()
