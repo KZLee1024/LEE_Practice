@@ -149,7 +149,7 @@ class DeviceMap(QWidget):
 
     def move_device_handler(self, device_index, x, y):
         self.anim = QPropertyAnimation(self.label_list[device_index], b"pos")
-        self.anim.setDuration(2000)
+        self.anim.setDuration(1000)
         self.anim.setStartValue(self.label_list[device_index].pos())
         self.anim.setEndValue(self.coordinate_transform(x/global_pars.BASE_WIDTH, y/global_pars.BASE_HEIGHT))
         self.anim.start()

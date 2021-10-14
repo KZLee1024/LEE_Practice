@@ -7,6 +7,8 @@ import struct
 # from utlis.arg_parser import getArg
 from sys import argv
 
+import global_pars
+
 
 def getArg(flag, default=None):
     for i, v in enumerate(argv):
@@ -31,15 +33,20 @@ def send_position_message(device_index=0):
     global client_address
     semaphore.acquire()
 
+    x, y = 0, 100
+
     for _ in range(message_limit):
         # time.sleep(random.random() * 20)
-        time.sleep(3)
+        time.sleep(0.5)
 
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
 
-        x = int(random.random() * 650)
-        y = int(random.random() * 350)
+        # x = int(random.random() * 650)
+        # y = int(random.random() * 350)
+
+        x += int(global_pars.BASE_WIDTH / message_limit)
+        # y += int(global_pars.BASE_HEIGHT / message_limit)
 
         send_data = 'position'
         send_data = send_data + str(device_index)
@@ -117,7 +124,7 @@ def send_detect_message(device_index=0):
 
 if __name__ == '__main__':
     semaphore = threading.BoundedSemaphore(device_limit)
-    for i in range(device_limit):
+    for i in range(1):
         w = threading.Thread(target=send_position_message, args=(i,), daemon=True)
         t = threading.Thread(target=send_parameters_message, args=(i,), daemon=True)
         z = threading.Thread(target=send_detect_message, args=(i,), daemon=True)
