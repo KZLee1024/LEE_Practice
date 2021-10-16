@@ -21,8 +21,7 @@ class UDPClient(QObject):
     def handle_recv(self):
         recv_data, ip, port = self.udp_client.readDatagram(1024)
 
-        prefix=recv_data[0:8].decode()
-
+        prefix = recv_data[0:8].decode()
 
         if prefix == "position":
             self.handle_recv_position(recv_data)
@@ -31,9 +30,8 @@ class UDPClient(QObject):
         elif prefix == "detectif":
             self.handle_recv_detct(recv_data)
 
-
     def handle_recv_position(self, recv_data1):
-        recv_data=recv_data1.decode('utf-8')
+        recv_data = recv_data1.decode('utf-8')
         print(recv_data)
         recv_data = filter(str.isalnum, str(recv_data))
         recv_data = ''.join(list(recv_data))
@@ -52,18 +50,17 @@ class UDPClient(QObject):
             self.trigger_move_device.emit(device_index, x, y)
 
     def handle_recv_parameter(self, recv_data):
-        detail=struct.unpack("iffii", recv_data[8:len(recv_data)])
-        print("videoinfo:",detail)
+        detail = struct.unpack("iffii", recv_data[8:len(recv_data)])
+        print("videoinfo:", detail)
 
         device_index = detail[0]
 
     def handle_recv_detct(self, recv_data):
         name_len = struct.unpack("i", recv_data[8:12])
         name2 = recv_data[12:12 + name_len[0]].decode()
-        detail=struct.unpack("iffiiii", recv_data[12 + name_len[0]:len(recv_data)])
-        device_index=detail[0]
-        accuracy=detail[1]
-        distance=detail[2]
+        detail = struct.unpack("iffiiiii", recv_data[12 + name_len[0]:len(recv_data)])
+        device_index = detail[0]
+        accuracy = detail[1]
+        distance = detail[2]
 
-
-        print("detectinfo:",name_len,name2,detail)
+        print("detectinfo:", name_len, name2, detail)
