@@ -1,22 +1,24 @@
 import sys
+import time
 
-from PyQt5.QtCore import QUrl, QTimer, QRect
+from PyQt5.QtCore import QUrl, QTimer, QRect, QPointF
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton, \
+    QLabel
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
-import matplotlib
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 
 import global_pars
-
-matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
-from pylab import *
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from models.device import Device
+from utlis.player import Player
 
 import threading
 import random
 import numpy as np
+
+device = Device.sample()[0]
 
 
 class Terminal(QMainWindow):
@@ -26,59 +28,56 @@ class Terminal(QMainWindow):
         widget = QWidget()
         self.setCentralWidget(widget)
 
-        widget.setMaximumWidth(500)
-        widget.setMinimumHeight(800)
+        self.player_container = QLabel()
+        self.player_container.setFixedSize(800, 600)
+        self.player_container.setText("")
+        self.player_container.setObjectName("FullScreenVideo")
 
         self.start_button = QPushButton('Start')
-        self.end_button = QPushButton('end')
-        self.start_button.clicked.connect(self.start_timer)
-        self.end_button.clicked.connect(self.end_timer)
+        # self.end_button = QPushButton('end')
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.draw)
+        self.start_button.clicked.connect(self.start_push)
+        # self.end_button.clicked.connect(self.end_push)
 
-        self.figure = plt.Figure()
-        self.canvas = FigureCanvas(self.figure)
+        self.graphs = {}
+        self.x = []
+        self.y_pars = {}
+        self.data_line = {}
+
+        line_pen = pg.mkPen(color=(255, 0, 0), width=5)
+        for key in global_pars.PARAMETER_KEYS:
+            graph_widget = pg.PlotWidget()
+            graph_widget.setFixedSize(200, 200)
+            graph_widget.setBackground('w')
+            graph_widget.setLabel('bottom', '<span style=\"color:black;font-size:20px\"> Loss-Rate </span>')
+            graph_widget.showGrid(x=True, y=True)
+            graph_widget.setXRange(0, 30)
+
+            self.graphs[key] = graph_widget
+            self.y_pars[key] = []
+            self.data_line[key] = graph_widget.plot(self.x, self.y_pars[key], pen=line_pen)
 
         buttons_box = QHBoxLayout()
         buttons_box.addWidget(self.start_button)
-        buttons_box.addWidget(self.end_button)
+        # buttons_box.addWidget(self.end_button)
 
-        layout = QVBoxLayout()
-        layout.addLayout(buttons_box)
-        layout.addWidget(self.canvas)
+        v_box = QVBoxLayout()
+        v_box.addLayout(buttons_box)
+        for key in self.graphs:
+            v_box.addWidget(self.graphs[key])
 
+        layout = QHBoxLayout()
+        layout.addWidget(self.player_container)
+        layout.addLayout(v_box)
         widget.setLayout(layout)
 
-        self.pars_label = global_pars.PARAMETER_KEYS
-        self.data_lists = [[] for _ in range(4)]
+        player = Player(container=self.player_container, device=device)
 
-        threading.Thread(target=self.push_data, daemon=True).start()
+        threading.Thread(target=player.display, daemon=True).start()
+        self.push_data_thread = threading.Thread(target=self.push_data, daemon=True)
 
-    def draw(self):
-        print(self.data_lists)
-        self.figure.clf()
-
-        axes = self.figure.subplots(4, 1)
-
-        for ax, data, label in zip(axes, self.data_lists, self.pars_label):
-            ax.plot(data, color='g')
-            ax.set_xlim(0, 30)
-            ax.set_xticks([])
-            ax.set_xlabel(label)
-
-        self.canvas.draw()
-        plt.grid(True)
-
-    def start_timer(self):
-        self.timer.start(50)
-        self.start_button.setEnabled(False)
-        self.end_button.setEnabled(True)
-
-    def end_timer(self):
-        self.timer.stop()
-        self.start_button.setEnabled(True)
-        self.end_button.setEnabled(False)
+    def start_push(self):
+        self.push_data_thread.start()
 
     def center(self):
         qr = self.frameGeometry()
@@ -87,15 +86,22 @@ class Terminal(QMainWindow):
         self.move(qr.topLeft())
 
     def push_data(self):
-        while True:
+        for _ in range(50):
             pars = [random.randint(0, 100), random.randint(0, 100), int(random.random() * 2) + 2421,
                     100 + random.randint(0, 30)]
             print(pars)
 
-            for data_list, data in zip(self.data_lists, pars):
-                data_list.append(data)
-                if len(data_list) > 30:
-                    data_list.pop(0)
+            if len(self.x) == 0:
+                self.x.append(0)
+            elif len(self.x) < 30:
+                self.x.append(self.x[-1]+1)
+
+            for index, key in enumerate(global_pars.PARAMETER_KEYS):
+                self.y_pars[key].append(pars[index])
+                if len(self.y_pars[key]) > 30:
+                    self.y_pars[key].pop(0)
+
+                self.data_line[key].setData(self.x, self.y_pars[key])
 
             time.sleep(0.5)
 
