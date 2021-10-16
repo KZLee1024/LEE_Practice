@@ -54,6 +54,14 @@ class UDPClient(QObject):
         print("videoinfo:", detail)
 
         device_index = detail[0]
+        data = detail[1:]
+
+        pars = {}
+        for index in range(len(global_pars.PARAMETER_KEYS)):
+            pars[global_pars.PARAMETER_KEYS[index]] = data[index]
+
+        assert device_index >= 0
+        self.trigger_update_parameter.emit(device_index, pars)
 
     def handle_recv_detct(self, recv_data):
         name_len = struct.unpack("i", recv_data[8:12])

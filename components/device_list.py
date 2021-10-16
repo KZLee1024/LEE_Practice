@@ -46,7 +46,13 @@ class DeviceList(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.setStyleSheet(
             "color:white;font-size:15px;font-family:song;background-color:#2C3E50;selection-background-color: #84AF9B")
-        self.setHorizontalHeaderLabels([' '] + self.pars_label)
+
+        pars_header_label = list(self.pars_label)
+        pars_header_label[0] += '(%)'
+        pars_header_label[1] += '(ms)'
+        pars_header_label[2] += '(MHz)'
+        pars_header_label[3] += '(mW)'
+        self.setHorizontalHeaderLabels([' '] + pars_header_label + ['详情显示'])
         self.setVerticalHeaderLabels(map(str, range(1, len(self.devices))))
 
         # cannot be edited
@@ -64,7 +70,6 @@ class DeviceList(QTableWidget):
         for row in range(len(self.devices)):
             self.setItem(row, 0, QTableWidgetItem(self.devices[row].title()))
 
-            self.setHorizontalHeaderItem(len(self.pars_label) + 1, QTableWidgetItem("详情显示"))
             self.btn_list[row].setDown(False)
             self.btn_list[row].setStyleSheet("QPushButton{margin:5px};")
             self.btn_list[row].setStyleSheet("color:black;font-size:25px;font-weight:bold;font-family:Roman times;")
@@ -73,14 +78,11 @@ class DeviceList(QTableWidget):
 
             col = 1
             for property in self.pars_label:
-                # The device instance holds only the initial value of their properties
-                # And that's exactly what is needed here
                 if self.devices[row].properties[property] is not None:
                     QTableWidgetItem(self.devices[row].properties[self.pars_label[col - 1]]).setForeground(
                         QBrush(QColor(255, 0, 0)))
                     self.setItem(row, col, QTableWidgetItem(self.devices[row].properties[self.pars_label[col - 1]]))
                 else:
-                    QTableWidgetItem(' - ').setForeground(QBrush(QColor(255, 0, 0)))
                     self.setItem(row, col, QTableWidgetItem(' - '))
                 col += 1
 
@@ -117,64 +119,35 @@ class DeviceList(QTableWidget):
     def update_parameter_handler(self, device_index, pars: dict):
         print(device_index, pars)
 
-        oldValue, newValue = -1, -1
+        old_value, newValue = -1, -1
         newLabel = '-'
 
         full_screen_pars = {}
 
-        for key, value in pars.items():
+        for index, (key, value) in enumerate(pars.items()):
             col = global_pars.PARAMETER_KEYS.index(key) + 1
             if col <= 0:
                 continue
 
-            if key == 'Loss-Rate':
-                oldLabel = self.item(device_index, col).text()
-                if oldLabel != '-':
-                    oldValue = float(oldLabel[:-1])
-                newValue = round(value, 2)
-                newLabel = str(newValue) + '%'
-                self.properties[device_index]['Loss-Rate'].append(newValue)
-                if len(self.properties[device_index]['Loss-Rate']) > 5:
-                    self.properties[device_index]['Loss-Rate'].pop(0)
-                full_screen_pars['Loss-Rate'] = newValue
-            elif key == 'Latency':
-                oldLabel = self.item(device_index, col).text()
-                if oldLabel != '-':
-                    oldValue = float(oldLabel[:-2])
-                newValue = round(value, 2)
-                newLabel = str(newValue) + 'ms'
-                self.properties[device_index]['Latency'].append(newValue)
-                if len(self.properties[device_index]['Latency']) > 5:
-                    self.properties[device_index]['Latency'].pop(0)
-                full_screen_pars['Latency'] = newValue
-            elif key == 'Channel':
-                oldLabel = self.item(device_index, col).text()
-                if oldLabel != '-':
-                    oldValue = int(oldLabel[:-3])
-                newValue = int(value)
-                newLabel = str(newValue) + 'MHz'
-                self.properties[device_index]['Channel'].append(newValue)
-                if len(self.properties[device_index]['Channel']) > 5:
-                    self.properties[device_index]['Channel'].pop(0)
-                full_screen_pars['Channel'] = newValue
-            elif key == 'Power':
-                oldLabel = self.item(device_index, col).text()
-                if oldLabel != '-':
-                    oldValue = int(oldLabel[:-2])
-                newValue = int(value)
-                newLabel = str(newValue) + 'mW'
-                self.properties[device_index]['Power'].append(newValue)
-                if len(self.properties[device_index]['Power']) > 5:
-                    self.properties[device_index]['Power'].pop(0)
-                full_screen_pars['Power'] = newValue
+            # Update screen label of device-list
+            old_label = self.item(device_index, col).text()
+            if old_label != '-':
+                old_value = float(old_label)
+            new_value = round(value, 2)
 
-            self.item(device_index, col).setText(newLabel)
-            if newValue > oldValue:
+            self.item(device_index, col).setText(str(new_value))
+            if new_value > old_value:
                 color = Qt.red
-            elif newValue < oldValue:
+            elif new_value < old_value:
                 color = Qt.blue
             else:
                 color = Qt.black
             self.item(device_index, col).setForeground(color)
+
+            # Update the parameter list
+            self.properties[device_index][key].append(newValue)
+            if len(self.properties[device_index][key]) > 5:
+                self.properties[device_index][key].pop(0)
+            full_screen_pars[key] = newValue
 
         self.trigger_update_parameters_for_device_detail.emit(device_index, full_screen_pars)
