@@ -60,7 +60,7 @@ class DeviceDetails(QMainWindow):
             graph_widget = pg.PlotWidget()
             graph_widget.setFixedSize(400, 200)
             graph_widget.setBackground('w')
-            graph_widget.setLabel('bottom', '<span style=\"color:black;font-size:20px\"> Loss-Rate </span>')
+            graph_widget.setLabel('bottom', '<span style=\"color:black;font-size:20px\">' + par_key + '</span>')
             graph_widget.showGrid(x=True, y=True)
             graph_widget.setXRange(0, self.par_storage_limit)
 

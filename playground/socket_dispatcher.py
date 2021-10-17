@@ -7,8 +7,6 @@ import struct
 # from utlis.arg_parser import getArg
 from sys import argv
 
-import global_pars
-
 
 def getArg(flag, default=None):
     for i, v in enumerate(argv):
@@ -20,7 +18,7 @@ def getArg(flag, default=None):
 
 
 device_limit = int(getArg("-ld", 2))
-message_limit = int(getArg("-lm", 50))
+message_limit = int(getArg("-lm", 200))
 
 client_ip = getArg("-i", "127.0.0.1")
 client_port = int(getArg("-p", 8888))
@@ -33,7 +31,7 @@ def send_position_message(device_index=0):
     global client_address
     semaphore.acquire()
 
-    x, y = 0, 100
+    x, y = random.randint(0, 300), random.randint(0, 150)
 
     for _ in range(message_limit):
         # time.sleep(random.random() * 20)
@@ -42,11 +40,8 @@ def send_position_message(device_index=0):
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
 
-        # x = int(random.random() * 650)
-        # y = int(random.random() * 350)
-
-        x += int(global_pars.BASE_WIDTH / message_limit)
-        # y += int(global_pars.BASE_HEIGHT / message_limit)
+        x = min(x + random.randint(0, 6), 650)
+        y = min(y + random.randint(0, 3), 350)
 
         send_data = 'position'
         send_data = send_data + str(device_index)
@@ -70,7 +65,6 @@ def send_parameters_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
-        time.sleep(1)
         deviceParameter = device_index
         Packloss = random.randint(0, 100) + 0.1
         Latency = random.randint(0, 100) + 0.1
@@ -80,7 +74,9 @@ def send_parameters_message(device_index=0):
         send_data = "videoifo".encode() + struct.pack("iffii", deviceParameter, Packloss, Latency, Channel, Power)
         udp_socket.sendto(send_data, client_address)
         detail = struct.unpack("iffii", send_data[8:len(send_data)])
+
         print("videoinfo:", detail)
+        time.sleep(5)
     semaphore.release()
 
 
@@ -108,29 +104,37 @@ def send_detect_message(device_index=0):
                                                                                                     results[4],
                                                                                                     results[5],
                                                                                                     results[6])
+        print(send_data)
 
         udp_socket.sendto(send_data, client_address)
 
-        name_len = struct.unpack("i", send_data[8:12])
-        name2 = send_data[12:12 + name_len[0]].decode()
-        detail = struct.unpack("ifiiiii", send_data[12 + name_len[0]:len(send_data)])
-        device_index = detail[0]
-        accuracy = detail[1]
-        distance = detail[2]
-        print("detectinfo:", name_len, name2, detail)
+        # name_len = struct.unpack("i", send_data[8:12])
+        # name2 = send_data[12:12 + name_len[0]].decode()
+        # detail = struct.unpack("ifiiiii", send_data[12 + name_len[0]:len(send_data)])
+        # device_index = detail[0]
+        # accuracy = detail[1]
+        # distance = detail[2]
+        # print("detectinfo:", name_len, name2, detail)
 
     semaphore.release()
 
-
 if __name__ == '__main__':
-    semaphore = threading.BoundedSemaphore(device_limit)
-    for i in range(1):
-        w = threading.Thread(target=send_position_message, args=(i,), daemon=True)
-        t = threading.Thread(target=send_parameters_message, args=(i,), daemon=True)
-        z = threading.Thread(target=send_detect_message, args=(i,), daemon=True)
-        # z.start()
-        # t.start()
-        w.start()
+    semaphore = threading.BoundedSemaphore(device_limit*3)
+
+    threads = []
+    for i in range(device_limit):
+        position = threading.Thread(target=send_position_message, args=(i,), daemon=True)
+        pars = threading.Thread(target=send_parameters_message, args=(i,), daemon=True)
+        # detect = threading.Thread(target=send_detect_message, args=(i,), daemon=True)
+
+        position.start()
+        pars.start()
+        # detect.start()
+
+        threads.append(position)
+        threads.append(pars)
+
+
 
 while threading.active_count() != 1:
     pass
