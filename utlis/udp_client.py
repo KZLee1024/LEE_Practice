@@ -1,3 +1,5 @@
+import struct
+
 import global_pars
 from global_pars import CLIENT_HOST, CLIENT_PORT
 
@@ -6,8 +8,8 @@ from PyQt5.QtNetwork import QUdpSocket
 
 
 class UDPClient(QObject):
-    trigger_move_device = pyqtSignal(int, int, int)         # device_index, x, y
-    trigger_update_parameter = pyqtSignal(int, dict)    # device_
+    trigger_move_device = pyqtSignal(int, int, int)  # device_index, x, y
+    trigger_update_parameter = pyqtSignal(int, dict)  # device_
 
     def __init__(self):
         super().__init__()
@@ -17,53 +19,56 @@ class UDPClient(QObject):
         self.udp_client.readyRead.connect(self.handle_recv)
 
     def handle_recv(self):
-        buf, ip, port = self.udp_client.readDatagram(1024)
-        recv_data = buf.decode('utf-8')
-        print(recv_data)
+        recv_data, ip, port = self.udp_client.readDatagram(1024)
 
-        # =======过滤出字母和数字=========#
-        # recv_data = filter(str.isalnum, str(recv_data))
-        # recv_data = ''.join(list(recv_data))
-        # print(recv_data)
+        prefix = recv_data[0:8].decode()
 
-        if recv_data.startswith('devicePosition'):
+        if prefix == "position":
             self.handle_recv_position(recv_data)
-        elif recv_data.startswith('deviceParameter'):
+        elif prefix == "videoifo":
             self.handle_recv_parameter(recv_data)
+        elif prefix == "detectif":
+            self.handle_recv_detct(recv_data)
 
-    def handle_recv_position(self,  recv_data):
-        recv_data = recv_data[len('devicePosition'):]
+    def handle_recv_position(self, recv_data1):
+        recv_data = recv_data1.decode('utf-8')
         print(recv_data)
+        recv_data = filter(str.isalnum, str(recv_data))
+        recv_data = ''.join(list(recv_data))
+        print(recv_data)
+        if recv_data.startswith('p'):
+            recv_data = recv_data[len('position'):]
+            print(recv_data)
 
-        # TODO: regulate the dispatcher to send word split by ' '
-        # ======= 获得坐标值 ========= #
-        device_index = int(recv_data.split('x')[0])
-        x = int(recv_data.split('x')[1].split('y')[0])
-        y = int(recv_data.split('x')[1].split('y')[1])
+            # ======= 获得坐标值 ========= #
+            device_index = int(recv_data[0])
+            x = int(recv_data.split('x')[1].split('y')[0])
+            y = int(recv_data.split('x')[1].split('y')[1])
 
-        print((device_index, x, y))
-        assert device_index >= 0 and x >= 0 and y >= 0
-        self.trigger_move_device.emit(device_index, x, y)
+            print((device_index, x, y))
+            assert device_index >= 0 and x >= 0 and y >= 0
+            self.trigger_move_device.emit(device_index, x, y)
 
     def handle_recv_parameter(self, recv_data):
-        recv_data = recv_data[len('deviceParameter'):].split(' ')
-        # print(recv_data)
+        detail = struct.unpack("iffii", recv_data[8:len(recv_data)])
+        print("videoinfo:", detail)
 
-        # ================== 获得属性key-value对 =================== #
-        # ======= deviceParameter device_index key value ========= #
-        device_index = int(recv_data[0])
+        device_index = detail[0]
+        data = detail[1:]
 
         pars = {}
-        for data in recv_data[1:]:
-            data = data.split(':')
-            if global_pars.PARAMETER_KEYS.__contains__(data[0]):
-                pars[data[0]] = data[1]
+        for index in range(len(global_pars.PARAMETER_KEYS)):
+            pars[global_pars.PARAMETER_KEYS[index]] = data[index]
 
-        # print(device_index, pars)
         assert device_index >= 0
         self.trigger_update_parameter.emit(device_index, pars)
 
+    def handle_recv_detct(self, recv_data):
+        name_len = struct.unpack("i", recv_data[8:12])
+        name2 = recv_data[12:12 + name_len[0]].decode()
+        detail = struct.unpack("iffiiiii", recv_data[12 + name_len[0]:len(recv_data)])
+        device_index = detail[0]
+        accuracy = detail[1]
+        distance = detail[2]
 
-
-
-
+        print("detectinfo:", name_len, name2, detail)

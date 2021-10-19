@@ -7,9 +7,14 @@ import global_pars
 
 from models.device import Device, DeviceType
 
+ORIGINAL_SIZE: QSize = QSize(90, 120)
+SCALED_SIZE: QSize = QSize(110, 140)
+
+
 class DeviceMap(QWidget):
     device_list: [Device] = []
     label_list: [QWidget] = []
+    position_label_list: [QLabel] = []
     selected_device_index = -1
 
     def __init__(self, device_list: [Device]):
@@ -53,20 +58,27 @@ class DeviceMap(QWidget):
             label_pix.setScaledContents(True)
             label_pix.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignTop)
 
-            label_text = QLabel()
-            label_text.setText(device.title())
-            label_text.setScaledContents(True)
-            label_text.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            label_text.setMaximumHeight(20)
+            device_label = QLabel()
+            device_label.setText(device.title())
+            device_label.setScaledContents(True)
+            device_label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+            device_label.setMaximumHeight(20)
 
+            coordinate_label = QLabel()
+            coordinate_label.setText('(' + str(device.coordinate[0]) + ',' + str(device.coordinate[1]) + ')')
+            coordinate_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
+
+            layout.addWidget(device_label)
             layout.addWidget(label_pix)
-            layout.addWidget(label_text)
+            layout.addWidget(coordinate_label)
             widget.setLayout(layout)
-            widget.resize(70, 90)
+            widget.resize(ORIGINAL_SIZE)
 
-            widget.move(self.coordinate_transform(device.coordinate[0], device.coordinate[1]))
+            widget.move(self.coordinate_transform(device.coordinate[0] / global_pars.BASE_WIDTH,
+                                                  device.coordinate[1] / global_pars.BASE_HEIGHT))
+
+            self.position_label_list.append(coordinate_label)
             self.label_list.append(widget)
-
 
         if len(self.device_list) > 0:
             self.change_device_handler(0)
@@ -83,8 +95,8 @@ class DeviceMap(QWidget):
                 self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
                 self.anim.setDuration(1000)
                 self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
-                self.anim.setEndValue(
-                    self.coordinate_transform(target_coordinate_x, target_coordinate_y))
+                self.anim.setEndValue(self.coordinate_transform(target_coordinate_x / self.geometry().width(),
+                                                                target_coordinate_y / self.geometry().height()))
                 self.anim.start()
 
     def hide_map(self):
@@ -106,7 +118,7 @@ class DeviceMap(QWidget):
         self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"pos")
         self.anim.setDuration(1000)
         self.anim.setStartValue(self.label_list[self.selected_device_index].pos())
-        self.anim.setEndValue(self.coordinate_transform(target.x()/canvas.width(), target.y()/canvas.height()))
+        self.anim.setEndValue(self.coordinate_transform(target.x() / canvas.width(), target.y() / canvas.height()))
         self.anim.start()
 
     #  (0,0) ——————————————————— (wid,0)    #
@@ -117,22 +129,23 @@ class DeviceMap(QWidget):
     def coordinate_transform(self, target_coordinate_x: float, target_coordinate_y: float) -> QPoint:
         # Waiting for Coordinate Signal
         # return clickPos directly now
-        if target_coordinate_x > 0.85:
-            target_coordinate_x = 0.85
-        if target_coordinate_y > 0.8:
-            target_coordinate_y = 0.8
+        if target_coordinate_x > 0.93:
+            target_coordinate_x = 0.93
+        if target_coordinate_y > 0.75:
+            target_coordinate_y = 0.75
 
-        return QPoint(int(self.geometry().width() * target_coordinate_x), int(self.geometry().height() * target_coordinate_y))
+        return QPoint(int(self.geometry().width() * target_coordinate_x),
+                      int(self.geometry().height() * target_coordinate_y))
 
     def change_device_handler(self, new_index):
         if self.selected_device_index != -1:
-            self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
-            self.anim.setDuration(100)
-            self.anim.setStartValue(self.label_list[self.selected_device_index].size())
-            self.anim.setEndValue(QSize(70, 90))
-            self.anim.start()
+            # self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
+            # self.anim.setDuration(100)
+            # self.anim.setStartValue(self.label_list[self.selected_device_index].size())
+            # self.anim.setEndValue(ORIGINAL_SIZE)
+            # self.anim.start()
             # point = self.label_list[self.selected_device_index].pos()
-            self.label_list[self.selected_device_index].resize(QSize(70, 90))
+            self.label_list[self.selected_device_index].resize(ORIGINAL_SIZE)
             pe = QPalette()
             pe.setColor(QPalette.WindowText, Qt.black)
             self.label_list[self.selected_device_index].setPalette(pe)
@@ -143,13 +156,15 @@ class DeviceMap(QWidget):
         self.anim = QPropertyAnimation(self.label_list[self.selected_device_index], b"size")
         self.anim.setDuration(100)
         self.anim.setStartValue(self.label_list[self.selected_device_index].size())
-        self.anim.setEndValue(QSize(90, 110))
+        self.anim.setEndValue(SCALED_SIZE)
         self.anim.start()
         self.label_list[self.selected_device_index].setPalette(pe)
 
     def move_device_handler(self, device_index, x, y):
         self.anim = QPropertyAnimation(self.label_list[device_index], b"pos")
-        self.anim.setDuration(2000)
+        self.anim.setDuration(500)
         self.anim.setStartValue(self.label_list[device_index].pos())
-        self.anim.setEndValue(self.coordinate_transform(x/100, y/100))
+        self.anim.setEndValue(self.coordinate_transform(x / global_pars.BASE_WIDTH, y / global_pars.BASE_HEIGHT))
         self.anim.start()
+
+        self.position_label_list[device_index].setText('(' + str(x) + ',' + str(y) + ')')

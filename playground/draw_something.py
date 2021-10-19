@@ -1,19 +1,24 @@
 import sys
+import time
 
-from PyQt5.QtCore import QUrl, QTimer, QRect
+from PyQt5.QtCore import QUrl, QTimer, QRect, QPointF
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QDesktopWidget, QVBoxLayout, QPushButton, \
+    QLabel
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
-import matplotlib
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 
-matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
-from pylab import *
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import global_pars
+from models.device import Device
+from utlis.player import Player
 
 import threading
 import random
+import numpy as np
+
+device = Device.sample()[0]
 
 
 class Terminal(QMainWindow):
@@ -23,58 +28,56 @@ class Terminal(QMainWindow):
         widget = QWidget()
         self.setCentralWidget(widget)
 
-        widget.setFixedSize(800, 600)
+        self.player_container = QLabel()
+        self.player_container.setFixedSize(800, 600)
+        self.player_container.setText("")
+        self.player_container.setObjectName("FullScreenVideo")
 
         self.start_button = QPushButton('Start')
-        self.end_button = QPushButton('end')
-        self.start_button.clicked.connect(self.start_timer)
-        self.end_button.clicked.connect(self.end_timer)
+        # self.end_button = QPushButton('end')
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.show_time)
+        self.start_button.clicked.connect(self.start_push)
+        # self.end_button.clicked.connect(self.end_push)
 
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
+        self.graphs = {}
+        self.x = []
+        self.y_pars = {}
+        self.data_line = {}
 
-        h_box = QHBoxLayout()
-        h_box.addWidget(self.start_button)
-        h_box.addWidget(self.end_button)
+        line_pen = pg.mkPen(color=(255, 0, 0), width=5)
+        for key in global_pars.PARAMETER_KEYS:
+            graph_widget = pg.PlotWidget()
+            graph_widget.setFixedSize(200, 200)
+            graph_widget.setBackground('w')
+            graph_widget.setLabel('bottom', '<span style=\"color:black;font-size:20px\"> Loss-Rate </span>')
+            graph_widget.showGrid(x=True, y=True)
+            graph_widget.setXRange(0, 30)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.canvas)
-        layout.addLayout(h_box)
+            self.graphs[key] = graph_widget
+            self.y_pars[key] = []
+            self.data_line[key] = graph_widget.plot(self.x, self.y_pars[key], pen=line_pen)
 
+        buttons_box = QHBoxLayout()
+        buttons_box.addWidget(self.start_button)
+        # buttons_box.addWidget(self.end_button)
+
+        v_box = QVBoxLayout()
+        v_box.addLayout(buttons_box)
+        for key in self.graphs:
+            v_box.addWidget(self.graphs[key])
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.player_container)
+        layout.addLayout(v_box)
         widget.setLayout(layout)
 
-        self.num_a_list = []
-        self.num_b_list = []
-        self.num_c_list = []
+        player = Player(container=self.player_container, device=device)
 
-    def show_time(self):
-        ax = self.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+        threading.Thread(target=player.display, daemon=True).start()
+        self.push_data_thread = threading.Thread(target=self.push_data, daemon=True)
 
-        ax.clear()
-        ax.plot(self.num_a_list, label='A', linestyle=':', color='g')
-        ax.plot(self.num_b_list, label='B', linestyle='--', color='b')
-        ax.plot(self.num_c_list, label='C', linestyle='-.', color='r')
-
-        self.figure.legend()
-        self.canvas.draw()
-        plt.grid(True)
-
-    def start_timer(self):
-        self.timer.start(100)
-        self.start_button.setEnabled(False)
-        self.end_button.setEnabled(True)
-
-    def end_timer(self):
-        self.timer.stop()
-        self.start_button.setEnabled(True)
-        self.end_button.setEnabled(False)
-
-        self.num_a_list = []
-        self.num_b_list = []
-        self.num_c_list = []
+    def start_push(self):
+        self.push_data_thread.start()
 
     def center(self):
         qr = self.frameGeometry()
@@ -82,108 +85,32 @@ class Terminal(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+    def push_data(self):
+        for _ in range(50):
+            pars = [random.randint(0, 100), random.randint(0, 100), int(random.random() * 2) + 2421,
+                    100 + random.randint(0, 30)]
+            print(pars)
 
-class App(QWidget):
-    def __init__(self, parent=None):
-        # 父类初始化方法
-        super(App, self).__init__(parent)
-        self.initUI()
-        self.center()
+            if len(self.x) == 0:
+                self.x.append(0)
+            elif len(self.x) < 30:
+                self.x.append(self.x[-1]+1)
 
-        threading.Thread(target=self.getData).start()
+            for index, key in enumerate(global_pars.PARAMETER_KEYS):
+                self.y_pars[key].append(pars[index])
+                if len(self.y_pars[key]) > 30:
+                    self.y_pars[key].pop(0)
 
-    def initUI(self):
-        self.setWindowTitle('数据可视化')
-        self.setFixedSize(800, 600)
-        self.setMinimumSize(800, 600)
-        self.setMaximumSize(800, 600)
-        # 几个QWidgets
+                self.data_line[key].setData(self.x, self.y_pars[key])
 
-        self.startBtn = QPushButton('开始')
-        self.endBtn = QPushButton('结束')
-        self.startBtn.clicked.connect(self.startTimer)
-        self.endBtn.clicked.connect(self.endTimer)
-        # 时间模块
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.showTime)
-        # 图像模块
-        self.figure = plt.figure()
+            time.sleep(0.5)
 
-        self.canvas = FigureCanvas(self.figure)
-        # 垂直布局
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.startBtn)
-        layout.addWidget(self.endBtn)
-        layout.addWidget(self.canvas)
-        self.setLayout(layout)
-
-        # 数组初始化
-        self.people_num_list = []
-        self.cars_num_list = []
-        self.motors_num_list = []
-
-    def center(self, screenNum=0):
-        screen = QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        self.normalGeometry2 = QRect((screen.width() - size.width()) / 2 + screen.left(),
-                                     (screen.height() - size.height()) / 2,
-                                     size.width(), size.height())
-        self.setGeometry((screen.width() - size.width()) / 2 + screen.left(),
-                         (screen.height() - size.height()) / 2,
-                         size.width(), size.height())
-
-    def showTime(self):
-        # shuju=np.random.random_sample()*10#返回一个[0,1)之间的浮点型随机数*10
-        # shuju_2=np.random.random_sample()*10#返回一个[0,1)之间的浮点型随机数*10
-        # self.x.append(shuju)#数组更新
-        # self.xx.append(shuju_2)
-
-        ax = self.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-
-        ax.clear()
-        ax.plot(self.people_num_list, label="people_num", linestyle=':', color="g")
-        ax.plot(self.cars_num_list, label="cars_num", color="b", linestyle='--')
-        ax.plot(self.motors_num_list, label="motors_num", color="r", linestyle='-.')
-
-        self.figure.legend()
-        self.canvas.draw()
-        plt.grid(True)
-
-    # 启动函数
-    def startTimer(self):
-        # 设置计时间隔并启动
-        self.timer.start(100)  # 每隔一秒执行一次绘图函数 showTime
-        self.startBtn.setEnabled(False)  # 开始按钮变为禁用
-        self.endBtn.setEnabled(True)  # 结束按钮变为可用
-
-    def endTimer(self):
-        self.timer.stop()  # 计时停止
-        self.startBtn.setEnabled(True)  # 开始按钮变为可用
-        self.endBtn.setEnabled(False)  # 结束按钮变为可用
-        self.people_num_list = []
-        self.cars_num_list = []
-        self.motors_num_list = []
-
-    def getData(self):
-        while True:
-            people_num = random.randint(0, 10)
-            cars_num = random.randint(0, 10)
-            motors_num = random.randint(0, 15)
-
-            print(people_num, cars_num, motors_num)
-
-            self.people_num_list.append(people_num)
-            self.cars_num_list.append(cars_num)
-            self.motors_num_list.append(motors_num)
-            time.sleep(5)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    w = App()
-    w.show()
-    # terminal = Terminal()
-    # terminal.resize(1000, 500)
-    # terminal.center()
-    # terminal.show()
+    # w = App()
+    # w.show()
+    terminal = Terminal()
+    terminal.center()
+    terminal.show()
     sys.exit(app.exec_())

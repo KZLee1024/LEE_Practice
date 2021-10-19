@@ -2,6 +2,7 @@ import socket
 import threading
 import random
 import time
+import struct
 
 # from utlis.arg_parser import getArg
 from sys import argv
@@ -16,8 +17,8 @@ def getArg(flag, default=None):
     return default
 
 
-device_limit = int(getArg("-ld", 4))
-message_limit = int(getArg("-lm", 10))
+device_limit = int(getArg("-ld", 2))
+message_limit = int(getArg("-lm", 200))
 
 client_ip = getArg("-i", "127.0.0.1")
 client_port = int(getArg("-p", 8888))
@@ -30,16 +31,19 @@ def send_position_message(device_index=0):
     global client_address
     semaphore.acquire()
 
+    x, y = random.randint(0, 300), random.randint(0, 150)
+
     for _ in range(message_limit):
-        time.sleep(random.random() * 10)
+        # time.sleep(random.random() * 20)
+        time.sleep(0.5)
 
         # input_data = input("input device_index,x and y (split by ' '): ")
         # device_index, x, y = input_data.split(' ')
 
-        x = int(random.random() * 100)
-        y = int(random.random() * 100)
+        x = min(x + random.randint(0, 6), 650)
+        y = min(y + random.randint(0, 3), 350)
 
-        send_data = 'devicePosition:'
+        send_data = 'position'
         send_data = send_data + str(device_index)
         send_data = send_data + 'x:' + str(x)
         send_data = send_data + 'y:' + str(y)
@@ -61,35 +65,76 @@ def send_parameters_message(device_index=0):
     semaphore.acquire()
 
     for _ in range(message_limit):
-        time.sleep(1)
-        # TODO: send all parameters or only the changed part?
-        send_data = 'deviceParameter'
-        send_data += str(device_index) + ' '
+        deviceParameter = device_index
+        Packloss = random.randint(0, 100) + 0.1
+        Latency = random.randint(0, 100) + 0.1
+        Channel = int(random.random() * 2) + 2421
+        Power = POWER[int(random.randint(0, 3))]
 
-        send_data += 'Loss-Rate:'
-        send_data += str(random.randint(1, 100) / 100) + ' '
+        send_data = "videoifo".encode() + struct.pack("iffii", deviceParameter, Packloss, Latency, Channel, Power)
+        udp_socket.sendto(send_data, client_address)
+        detail = struct.unpack("iffii", send_data[8:len(send_data)])
 
-        send_data += 'Latency:'
-        send_data += str(random.randint(5, 80)) + ' '
-
-        send_data += 'Channel:'
-        send_data += str(2421) + ' '
-
-        send_data += 'Power:'
-        send_data += str(POWER[int(random.randint(0, 3))])
-
-        udp_socket.sendto(send_data.encode("utf-8"), client_address)
-        print('message sent: ', send_data)
-
+        print("videoinfo:", detail)
+        time.sleep(5)
     semaphore.release()
 
 
+def send_detect_message(device_index=0):
+    global client_address
+    semaphore.acquire()
+
+    for _ in range(message_limit):
+        time.sleep(1)
+        results = []
+        name = "car"
+        results.append(1)
+        results.append(0.95)
+        results.append(50.5)
+        results.append(20)
+        results.append(30)
+        results.append(40)
+        results.append(50)
+
+        send_data = "detectif".encode() + struct.pack("i", len(name)) + name.encode() + struct.pack("iffiiii",
+                                                                                                    results[0],
+                                                                                                    results[1],
+                                                                                                    results[2],
+                                                                                                    results[3],
+                                                                                                    results[4],
+                                                                                                    results[5],
+                                                                                                    results[6])
+        print(send_data)
+
+        udp_socket.sendto(send_data, client_address)
+
+        # name_len = struct.unpack("i", send_data[8:12])
+        # name2 = send_data[12:12 + name_len[0]].decode()
+        # detail = struct.unpack("ifiiiii", send_data[12 + name_len[0]:len(send_data)])
+        # device_index = detail[0]
+        # accuracy = detail[1]
+        # distance = detail[2]
+        # print("detectinfo:", name_len, name2, detail)
+
+    semaphore.release()
+
 if __name__ == '__main__':
-    semaphore = threading.BoundedSemaphore(device_limit)
+    semaphore = threading.BoundedSemaphore(device_limit*3)
+
+    threads = []
     for i in range(device_limit):
-        # t = threading.Thread(target=send_position_message, args=(i,))
-        t = threading.Thread(target=send_parameters_message, args=(i,))
-        t.start()
+        position = threading.Thread(target=send_position_message, args=(i,), daemon=True)
+        pars = threading.Thread(target=send_parameters_message, args=(i,), daemon=True)
+        # detect = threading.Thread(target=send_detect_message, args=(i,), daemon=True)
+
+        position.start()
+        pars.start()
+        # detect.start()
+
+        threads.append(position)
+        threads.append(pars)
+
+
 
 while threading.active_count() != 1:
     pass
