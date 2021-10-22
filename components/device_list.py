@@ -41,8 +41,7 @@ class DeviceList(QTableWidget):
 
         self.setMinimumHeight(200)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setStyleSheet(
-            "color:white;font-size:15px;font-family:song;background-color:#2C3E50;selection-background-color: #84AF9B")
+        self.setStyleSheet("color:white;font-size:15px;background-color:#2C3E50;selection-background-color: #84AF9B")
 
         pars_header_label = list(global_pars.PARAMETER_KEYS)
         pars_header_label[0] += '(%)'
@@ -78,7 +77,8 @@ class DeviceList(QTableWidget):
                 if self.devices[row].properties[property] is not None:
                     QTableWidgetItem(self.devices[row].properties[global_pars.PARAMETER_KEYS[col - 1]]).setForeground(
                         QBrush(QColor(255, 0, 0)))
-                    self.setItem(row, col, QTableWidgetItem(self.devices[row].properties[global_pars.PARAMETER_KEYS[col - 1]]))
+                    self.setItem(row, col,
+                                 QTableWidgetItem(self.devices[row].properties[global_pars.PARAMETER_KEYS[col - 1]]))
                 else:
                     self.setItem(row, col, QTableWidgetItem(' - '))
                 col += 1
@@ -115,6 +115,7 @@ class DeviceList(QTableWidget):
         self.trigger_close_device_detail.emit(device_index)
 
     counter = 0
+
     def update_parameter_handler(self, device_index, pars: dict):
         print(device_index, pars)
 

@@ -2,10 +2,11 @@ import sys
 import threading
 
 from PyQt5.QtCore import Qt, QDir
-from PyQt5.QtGui import QIcon, QPalette, QColor
+from PyQt5.QtGui import QIcon, QPalette, QColor, QFontDatabase, QFont
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QAction, QDesktopWidget, QVBoxLayout, \
     QFileDialog, QLabel
 
+import global_pars
 from components.device_list import DeviceList
 from components.device_map import DeviceMap
 from components.preview_list import PreviewList
@@ -128,6 +129,14 @@ class Terminal(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+
+    loadedFontID = QFontDatabase.addApplicationFont( global_pars.BASE_DIR + "/assets/fonts/msyh.ttf")
+    loadedFontFamilies = QFontDatabase.applicationFontFamilies(loadedFontID)
+    if (list(loadedFontFamilies).__len__() > 0):
+        fontName = loadedFontFamilies[0]
+        font = QFont(fontName)
+        # app.setFont(font)
+
     terminal = Terminal()
     # terminal.resize(1280, 720)
     terminal.center()

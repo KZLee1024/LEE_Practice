@@ -33,7 +33,7 @@ class DeviceMap(QWidget):
         # button_move = QPushButton("Move To")
 
         button_hide = QPushButton("地图显示功能")
-        button_hide.setStyleSheet("color:white;font-size:20px;font-family:Roman times;background-color:darkcyan;")
+        button_hide.setStyleSheet("color:white;font-size:20px;background-color:darkcyan;")
         button_hide.clicked.connect(self.hide_map)
         h_box = QHBoxLayout()
         h_box.addStretch(1)
